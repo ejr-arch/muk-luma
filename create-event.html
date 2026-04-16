@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Create a new event on MUK Events">
+  <title>Create Event | MUK Events</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23C8102E' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='50' font-weight='bold' fill='white'>M</text></svg>">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="create-event">
+  <div class="page-loader">
+    <div class="loader-spinner"></div>
+  </div>
+
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="navbar-brand">
+        <svg class="navbar-brand-icon" viewBox="0 0 32 32" fill="none">
+          <rect width="32" height="32" rx="8" fill="#C8102E"/>
+          <text x="16" y="22" text-anchor="middle" fill="white" font-size="18" font-weight="bold" font-family="Inter">M</text>
+        </svg>
+        <span>MUK Events</span>
+      </a>
+
+      <div class="navbar-nav">
+        <a href="/">Home</a>
+        <a href="events.html">Events</a>
+        <a href="organizations.html">Organizations</a>
+      </div>
+
+      <div class="navbar-actions">
+        <div class="user-menu">
+          <div class="dropdown">
+            <button class="btn btn-ghost" style="display: flex; align-items: center; gap: 8px;">
+              <div class="avatar avatar-sm user-avatar"></div>
+              <span class="user-name"></span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="dropdown-menu">
+              <a href="profile.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Profile
+              </a>
+              <a href="create-event.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Create Event
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item" id="sign-out-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="page-header">
+      <div class="container">
+        <h1 class="page-title">Create Event</h1>
+        <p class="page-subtitle">Share your event with the Makerere community</p>
+      </div>
+    </div>
+
+    <section class="section create-event-page" style="padding-top: 0;">
+      <div class="container">
+        <form id="create-event-form">
+          <div class="form-section">
+            <h3 class="form-section-title">Event Details</h3>
+
+            <div class="input-group">
+              <label class="input-label" for="event-title">Event Title *</label>
+              <input type="text" class="input" id="event-title" name="title" placeholder="Give your event a clear, catchy title" required maxlength="100">
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="event-description">Description *</label>
+              <textarea class="input" id="event-description" name="description" placeholder="Tell people what your event is about, what they can expect, and why they should attend..." rows="6" required maxlength="2000"></textarea>
+              <div class="char-counter" id="description-counter">0/2000</div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label">Event Image</label>
+              <div class="file-upload" id="file-upload">
+                <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                <p class="file-upload-text">Drag and drop an image here, or click to browse</p>
+                <p class="file-upload-hint">Recommended: 1200x630px, max 2MB</p>
+              </div>
+              <input type="file" id="event-image" accept="image/*" style="display: none;">
+              <div id="image-preview"></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Date & Time</h3>
+
+            <div class="form-row">
+              <div class="input-group">
+                <label class="input-label" for="event-date">Date *</label>
+                <input type="date" class="input" id="event-date" name="date" required>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label" for="event-time">Time *</label>
+                <input type="time" class="input" id="event-time" name="time" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Location</h3>
+
+            <div class="input-group">
+              <label class="input-label" for="event-location">Venue *</label>
+              <select class="input select" id="event-location" name="location_name" required>
+                <option value="">Select a venue</option>
+                <option value="Central Teaching Facility (CTF)">Central Teaching Facility (CTF)</option>
+                <option value="Faculty of Science">Faculty of Science</option>
+                <option value="Mitchell Hall">Mitchell Hall</option>
+                <option value="Africa Hall">Africa Hall</option>
+                <option value="University Hall">University Hall</option>
+                <option value="Nkrumah Hall">Nkrumah Hall</option>
+                <option value="Senate Building">Senate Building</option>
+                <option value="Library Lawn">Library Lawn</option>
+                <option value="Ellen Johnson Amphitheatre">Ellen Johnson Amphitheatre</option>
+                <option value="Other">Other (specify below)</option>
+              </select>
+            </div>
+
+            <div class="input-group hidden" id="custom-location-group">
+              <label class="input-label" for="event-location-custom">Custom Venue Name</label>
+              <input type="text" class="input" id="event-location-custom" placeholder="Enter venue name">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3 class="form-section-title">Category & Capacity</h3>
+
+            <div class="form-row">
+              <div class="input-group">
+                <label class="input-label" for="event-category">Category *</label>
+                <select class="input select" id="event-category" name="category" required>
+                  <option value="">Select a category</option>
+                  <option value="academic">Academic</option>
+                  <option value="cultural">Cultural</option>
+                  <option value="sports">Sports</option>
+                  <option value="career">Career</option>
+                  <option value="social">Social</option>
+                  <option value="technology">Technology</option>
+                  <option value="health">Health</option>
+                  <option value="art">Art</option>
+                </select>
+              </div>
+
+              <div class="input-group">
+                <label class="input-label" for="event-capacity">Capacity (optional)</label>
+                <input type="number" class="input" id="event-capacity" name="capacity" placeholder="Max number of attendees" min="1" max="10000">
+              </div>
+            </div>
+          </div>
+
+          <div class="flex gap-4 justify-between" style="margin-top: var(--space-8);">
+            <a href="/" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg">Create Event</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect width="32" height="32" rx="8" fill="#C8102E"/>
+              <text x="16" y="22" text-anchor="middle" fill="white" font-size="18" font-weight="bold" font-family="Inter">M</text>
+            </svg>
+            MUK Events
+          </div>
+          <p class="footer-description">Connecting the Makerere University community through events and experiences.</p>
+        </div>
+        <div>
+          <h4 class="footer-title">Platform</h4>
+          <div class="footer-links">
+            <a href="events.html">Browse Events</a>
+            <a href="organizations.html">Organizations</a>
+            <a href="create-event.html">Create Event</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-title">Resources</h4>
+          <div class="footer-links">
+            <a href="#">Help Center</a>
+            <a href="#">Guidelines</a>
+            <a href="#">Privacy Policy</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-title">Connect</h4>
+          <div class="footer-links">
+            <a href="#">Contact Us</a>
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Made with care at Makerere University</p>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+  <script>
+    const locationSelect = document.getElementById('event-location');
+    const customLocationGroup = document.getElementById('custom-location-group');
+    const customLocationInput = document.getElementById('event-location-custom');
+
+    locationSelect.addEventListener('change', () => {
+      if (locationSelect.value === 'Other') {
+        customLocationGroup.classList.remove('hidden');
+        customLocationInput.required = true;
+      } else {
+        customLocationGroup.classList.add('hidden');
+        customLocationInput.required = false;
+      }
+    });
+
+    const dateInput = document.getElementById('event-date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+
+    const form = document.getElementById('create-event-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let locationName = locationSelect.value;
+      if (locationName === 'Other') {
+        locationName = customLocationInput.value.trim();
+      }
+
+      const formData = new FormData(form);
+      const eventData = {
+        title: formData.get('title'),
+        description: formData.get('description'),
+        date: formData.get('date'),
+        time: formData.get('time'),
+        location_name: locationName,
+        category: formData.get('category'),
+        capacity: formData.get('capacity') ? parseInt(formData.get('capacity')) : null
+      };
+
+      const imageInput = document.getElementById('event-image');
+      let imageUrl = null;
+
+      if (imageInput.files?.[0]) {
+        const { uploadEventImage } = await import('./js/storage.js');
+        const { data, error } = await uploadEventImage(imageInput.files[0]);
+
+        if (error) {
+          const { showToast } = await import('./js/utils.js');
+          showToast('Failed to upload image', 'error');
+          return;
+        }
+
+        imageUrl = data.publicUrl;
+      }
+
+      if (imageUrl) {
+        eventData.image_url = imageUrl;
+      }
+
+      const { createEvent } = await import('./js/events.js');
+      const { data, error } = await createEvent(eventData);
+
+      if (!error && data) {
+        window.location.href = `/event.html?id=${data.id}`;
+      }
+    });
+  </script>
+</body>
+</html>

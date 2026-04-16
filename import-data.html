@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Import Mock Data - MUK Events</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 { color: #C8102E; }
+    .status {
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+    }
+    .success { background: #d4edda; color: #155724; }
+    .error { background: #f8d7da; color: #721c24; }
+    .info { background: #d1ecf1; color: #0c5460; }
+    .note {
+      background: #fff3cd;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      border-left: 4px solid #ffc107;
+    }
+    .accounts {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .account-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+    }
+    .account-item:last-child { border-bottom: none; }
+    .role { 
+      padding: 2px 8px; 
+      border-radius: 4px; 
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .role-student { background: #4F46E5; color: white; }
+    .role-organizer { background: #059669; color: white; }
+    .role-admin { background: #DC2626; color: white; }
+    button {
+      background: #C8102E;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    button:disabled { background: #ccc; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 MUK Events - Import Data</h1>
+    <p>This will import sample events, organizations, and user profiles into your Firebase Realtime Database.</p>
+    
+    <div class="note">
+      <strong>⚠️ Important:</strong> After importing, you must create the demo users in Firebase Console (Authentication) manually.
+    </div>
+    
+    <div class="accounts">
+      <h3>Demo Accounts (create these in Firebase Console)</h3>
+      <div class="account-item">
+        <span><span class="role role-student">STUDENT</span> student@muk-events.com</span>
+        <code>demo123456</code>
+      </div>
+      <div class="account-item">
+        <span><span class="role role-organizer">ORGANIZER</span> organizer@muk-events.com</span>
+        <code>demo123456</code>
+      </div>
+      <div class="account-item">
+        <span><span class="role role-admin">ADMIN</span> admin@muk-events.com</span>
+        <code>demo123456</code>
+      </div>
+    </div>
+    
+    <div id="output"></div>
+    
+    <br>
+    <button id="importBtn" onclick="importData()">Import Mock Data</button>
+  
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBt-iJiEOWO205mW0Y3p6EZo-LBeQnFjRw",
+      authDomain: "muk-luma.firebaseapp.com",
+      projectId: "muk-luma",
+      databaseURL: "https://muk-luma-default-rtdb.firebaseio.com",
+      storageBucket: "muk-luma.firebasestorage.app",
+      messagingSenderId: "208451460846",
+      appId: "1:208451460846:web:de36f0cc2de1e8d7541dff",
+      measurementId: "G-TBSGS6LMZ3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    const mockData = {
+      users: {
+        "user-student": {
+          id: "user-student",
+          name: "John Student",
+          email: "student@muk-events.com",
+          role: "student",
+          faculty: "Faculty of Computing and Informatics",
+          hall: "Lumumba Hall",
+          avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+          createdAt: Date.now()
+        },
+        "user-organizer": {
+          id: "user-organizer",
+          name: "Sarah Organizer",
+          email: "organizer@muk-events.com",
+          role: "organizer",
+          faculty: "Faculty of Arts",
+          hall: null,
+          avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=organizer",
+          createdAt: Date.now()
+        },
+        "user-admin": {
+          id: "user-admin",
+          name: "Admin User",
+          email: "admin@muk-events.com",
+          role: "admin",
+          faculty: null,
+          hall: null,
+          avatar_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+          createdAt: Date.now()
+        }
+      },
+      organizations: {
+        "org-001": {
+          "id": "org-001",
+          "name": "Computer Science Department",
+          "description": "The official Computer Science Department at Makerere University",
+          "logo_url": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=200"
+        },
+        "org-002": {
+          "id": "org-002",
+          "name": "Drama Club",
+          "description": "Expressing creativity through theatre and performing arts",
+          "logo_url": "https://images.unsplash.com/photo-1503095396549-807759245b35?w=200"
+        },
+        "org-003": {
+          "id": "org-003",
+          "name": "Career Services",
+          "description": "Connecting students with internship and job opportunities",
+          "logo_url": "https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=200"
+        },
+        "org-004": {
+          "id": "org-004",
+          "name": "Cultural Clubs",
+          "description": "Celebrating Uganda's diverse cultures",
+          "logo_url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=200"
+        },
+        "org-005": {
+          "id": "org-005",
+          "name": "Sports Office",
+          "description": "Organizing inter-faculty sports and athletics",
+          "logo_url": "https://images.unsplash.com/photo-1461896836934-3d2753bdb2db?w=200"
+        },
+        "org-006": {
+          "id": "org-006",
+          "name": "Rotaract Club",
+          "description": "Community service and professional development",
+          "logo_url": "https://images.unsplash.com/photo-1559027615-cd4628902d4a?w=200"
+        },
+        "org-007": {
+          "id": "org-007",
+          "name": "Debate Society",
+          "description": "Fostering critical thinking and public speaking",
+          "logo_url": "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=200"
+        },
+        "org-008": {
+          "id": "org-008",
+          "name": "Music Club",
+          "description": "For music enthusiasts and aspiring artists",
+          "logo_url": "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=200"
+        }
+      },
+      events: {
+        "evt-001": {
+          "id": "evt-001",
+          "title": "Tech for Tomorrow: AI in Africa",
+          "description": "Join us for an exciting exploration of how artificial intelligence is shaping the future of Africa. This event brings together industry experts, researchers, and students to discuss AI applications, challenges, and opportunities on the continent.\n\nTopics covered:\n- Machine learning in healthcare\n- AI for agriculture\n- Ethical considerations in AI development\n- Career paths in AI\n\nRefreshments will be provided.",
+          "date": "2026-05-15",
+          "time": "14:00",
+          "location_name": "Central Teaching Facility (CTF)",
+          "category": "technology",
+          "created_by": null,
+          "capacity": 200,
+          "image_url": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800",
+          "organization_ids": ["org-001"],
+          "createdAt": 1744800000000
+        },
+        "evt-002": {
+          "id": "evt-002",
+          "title": "MUK Drama Festival 2026",
+          "description": "The annual drama festival returns with a spectacular showcase of student talent. This year's theme is 'Stories That Matter' - original plays that explore contemporary African experiences.\n\nFeaturing:\n- 8 student productions\n- Guest performance by MUK Theatre Group\n- Award ceremony\n- Meet and greet with cast members",
+          "date": "2026-05-20",
+          "time": "18:00",
+          "location_name": "Mitchell Hall",
+          "category": "cultural",
+          "created_by": null,
+          "capacity": 500,
+          "image_url": "https://images.unsplash.com/photo-1503095396549-807759245b35?w=800",
+          "organization_ids": ["org-002"],
+          "createdAt": 1745220000000
+        },
+        "evt-003": {
+          "id": "evt-003",
+          "title": "Career Fair: Connect & Grow",
+          "description": "The biggest career fair at Makerere University! Connect with over 50 top employers from various industries.\n\nBring your CV and dress professionally. Free entry for all students.",
+          "date": "2026-06-01",
+          "time": "09:00",
+          "location_name": "Africa Hall",
+          "category": "career",
+          "created_by": null,
+          "capacity": 1000,
+          "image_url": "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
+          "organization_ids": ["org-003"],
+          "createdAt": 1746480000000
+        },
+        "evt-004": {
+          "id": "evt-004",
+          "title": "Inter-Faculty Sports Gala",
+          "description": "The biggest sporting event of the year! Cheer for your faculty as students compete across multiple sports: Football, Volleyball, Basketball, Athletics, and Table tennis.",
+          "date": "2026-06-10",
+          "time": "08:00",
+          "location_name": "University Sports Grounds",
+          "category": "sports",
+          "created_by": null,
+          "capacity": null,
+          "image_url": "https://images.unsplash.com/photo-1461896836934-3d2753bdb2db?w=800",
+          "organization_ids": ["org-005"],
+          "createdAt": 1746900000000
+        },
+        "evt-005": {
+          "id": "evt-005",
+          "title": "Cultural Night: Unity in Diversity",
+          "description": "Experience the rich cultural diversity of Makerere University! A celebration of unity, diversity, and the Makerere spirit.",
+          "date": "2026-06-15",
+          "time": "19:00",
+          "location_name": "Ellen Johnson Amphitheatre",
+          "category": "social",
+          "created_by": null,
+          "capacity": 300,
+          "image_url": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800",
+          "organization_ids": ["org-004"],
+          "createdAt": 1747400000000
+        },
+        "evt-006": {
+          "id": "evt-006",
+          "title": "Research Symposium: Innovation for Development",
+          "description": "Showcase your research and learn from peers! Categories include Science & Technology, Social Sciences, Business & Economics, and Health Sciences.",
+          "date": "2026-06-20",
+          "time": "09:00",
+          "location_name": "Faculty of Science",
+          "category": "academic",
+          "created_by": null,
+          "capacity": 150,
+          "image_url": "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+          "organization_ids": [],
+          "createdAt": 1747800000000
+        },
+        "evt-007": {
+          "id": "evt-007",
+          "title": "Health & Wellness Week",
+          "description": "Taking care of your body and mind! A week dedicated to health awareness: Free screenings, mental health workshops, fitness classes, and yoga sessions.",
+          "date": "2026-07-01",
+          "time": "08:00",
+          "location_name": "Senate Building",
+          "category": "health",
+          "created_by": null,
+          "capacity": null,
+          "image_url": "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800",
+          "organization_ids": [],
+          "createdAt": 1748700000000
+        },
+        "evt-008": {
+          "id": "evt-008",
+          "title": "Art Exhibition: Expressions of Tomorrow",
+          "description": "Discover the creative works of Makerere's finest art students. Featuring paintings, sculpture, photography, and digital art.",
+          "date": "2026-07-10",
+          "time": "10:00",
+          "location_name": "MUK Art Gallery",
+          "category": "art",
+          "created_by": null,
+          "capacity": 100,
+          "image_url": "https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=800",
+          "organization_ids": [],
+          "createdAt": 1749500000000
+        },
+        "evt-009": {
+          "id": "evt-009",
+          "title": "Hackathon: Build for Good",
+          "description": "48-hour coding challenge to build solutions for social impact. Categories: EdTech, Healthcare, Environment, and Finance.",
+          "date": "2026-05-25",
+          "time": "18:00",
+          "location_name": "Computer Lab 1",
+          "category": "technology",
+          "created_by": null,
+          "capacity": 100,
+          "image_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800",
+          "organization_ids": ["org-001"],
+          "createdAt": 1745600000000
+        },
+        "evt-010": {
+          "id": "evt-010",
+          "title": "Open Mic Night",
+          "description": "Show off your talents! Sing, rap, poetry, comedy - whatever your skill. Sign up on arrival. Hosted by the MUK Music Club.",
+          "date": "2026-05-28",
+          "time": "19:00",
+          "location_name": "The Pavilion",
+          "category": "social",
+          "created_by": null,
+          "capacity": 200,
+          "image_url": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800",
+          "organization_ids": ["org-008"],
+          "createdAt": 1745900000000
+        }
+      },
+      rsvps: {
+        "evt-001": {
+          "user-student": {
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            status: "going",
+            createdAt: 1744700000000
+          },
+          "user-admin": {
+            user_id: "user-admin",
+            user_name: "Admin User",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+            status: "going",
+            createdAt: 1744750000000
+          }
+        },
+        "evt-002": {
+          "user-student": {
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            status: "going",
+            createdAt: 1745000000000
+          },
+          "user-organizer": {
+            user_id: "user-organizer",
+            user_name: "Sarah Organizer",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=organizer",
+            status: "interested",
+            createdAt: 1745100000000
+          }
+        },
+        "evt-003": {
+          "user-student": {
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            status: "going",
+            createdAt: 1746200000000
+          },
+          "user-organizer": {
+            user_id: "user-organizer",
+            user_name: "Sarah Organizer",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=organizer",
+            status: "going",
+            createdAt: 1746300000000
+          },
+          "user-admin": {
+            user_id: "user-admin",
+            user_name: "Admin User",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+            status: "interested",
+            createdAt: 1746400000000
+          }
+        },
+        "evt-004": {
+          "user-student": {
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            status: "going",
+            createdAt: 1746700000000
+          }
+        },
+        "evt-009": {
+          "user-student": {
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            status: "going",
+            createdAt: 1745500000000
+          },
+          "user-admin": {
+            user_id: "user-admin",
+            user_name: "Admin User",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+            status: "going",
+            createdAt: 1745550000000
+          }
+        }
+      },
+      comments: {
+        "evt-001": {
+          "comment-001": {
+            event_id: "evt-001",
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            content: "This looks amazing! I've been waiting for an AI event at MUK. Definitely going!",
+            createdAt: 1744600000000
+          },
+          "comment-002": {
+            event_id: "evt-001",
+            user_id: "user-admin",
+            user_name: "Admin User",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+            content: "We have some exciting speakers lined up. Looking forward to seeing everyone there!",
+            createdAt: 1744650000000
+          },
+          "comment-003": {
+            event_id: "evt-001",
+            user_id: "user-organizer",
+            user_name: "Sarah Organizer",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=organizer",
+            content: "Will there be certificates for attendees?",
+            createdAt: 1744700000000
+          }
+        },
+        "evt-002": {
+          "comment-001": {
+            event_id: "evt-002",
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            content: "The Drama Festival is always the highlight of the year! Can't wait!",
+            createdAt: 1745100000000
+          }
+        },
+        "evt-003": {
+          "comment-001": {
+            event_id: "evt-003",
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            content: "Is there a dress code for the career fair?",
+            createdAt: 1746250000000
+          },
+          "comment-002": {
+            event_id: "evt-003",
+            user_id: "user-admin",
+            user_name: "Admin User",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+            content: "Business casual is recommended. Bring your CVs!",
+            createdAt: 1746300000000
+          },
+          "comment-003": {
+            event_id: "evt-003",
+            user_id: "user-organizer",
+            user_name: "Sarah Organizer",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=organizer",
+            content: "I'll be there with my updated CV. Hope to see some tech companies!",
+            createdAt: 1746350000000
+          }
+        },
+        "evt-009": {
+          "comment-001": {
+            event_id: "evt-009",
+            user_id: "user-admin",
+            user_name: "Admin User",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin",
+            content: "Looking for team members! Anyone interested in the EdTech category?",
+            createdAt: 1745450000000
+          },
+          "comment-002": {
+            event_id: "evt-009",
+            user_id: "user-student",
+            user_name: "John Student",
+            user_avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=student",
+            content: "Count me in! I have some ideas for healthcare solutions.",
+            createdAt: 1745480000000
+          }
+        }
+      }
+    };
+
+    window.importData = async function() {
+      const btn = document.getElementById('importBtn');
+      const output = document.getElementById('output');
+      
+      btn.disabled = true;
+      btn.textContent = 'Importing...';
+      
+      try {
+        output.innerHTML = '<div class="info">Starting import...</div>';
+        
+        await set(ref(database, 'users'), mockData.users);
+        output.innerHTML += '<div class="success">✓ User profiles imported (3)</div>';
+        
+        await set(ref(database, 'organizations'), mockData.organizations);
+        output.innerHTML += '<div class="success">✓ Organizations imported (8)</div>';
+        
+        await set(ref(database, 'events'), mockData.events);
+        output.innerHTML += '<div class="success">✓ Events imported (10)</div>';
+        
+        for (const [eventId, rsvps] of Object.entries(mockData.rsvps)) {
+          await set(ref(database, `events/${eventId}/rsvps`), rsvps);
+        }
+        output.innerHTML += '<div class="success">✓ RSVPs imported</div>';
+        
+        for (const [eventId, comments] of Object.entries(mockData.comments)) {
+          await set(ref(database, `events/${eventId}/comments`), comments);
+        }
+        output.innerHTML += '<div class="success">✓ Comments imported</div>';
+        
+        output.innerHTML += `
+          <div class="success">
+            <strong>Import complete!</strong><br><br>
+            <strong>Now create the demo users in Firebase Console:</strong><br>
+            1. Go to Authentication → Users → Add user<br>
+            2. Create student@muk-events.com, organizer@muk-events.com, admin@muk-events.com<br>
+            3. All with password: <code>demo123456</code>
+          </div>
+        `;
+        
+      } catch (error) {
+        console.error('Import error:', error);
+        output.innerHTML += `<div class="error">Error: ${error.message}</div>`;
+        btn.disabled = false;
+        btn.textContent = 'Retry Import';
+      }
+    };
+  </script>
+</body>
+</html>
