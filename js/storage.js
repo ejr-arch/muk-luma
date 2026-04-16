@@ -1,13 +1,9 @@
 import { showToast } from './utils.js';
-
-const CLOUDINARY_CLOUD_NAME = 'dkh8e8upn';
-const CLOUDINARY_API_KEY = '335179687539949';
-const CLOUDINARY_API_SECRET = 'BJJBpQ9P17ANwBzFiKGucsDQHlY';
-const CLOUDINARY_UPLOAD_PRESET = 'muk_events';
+import { CLOUDINARY } from './config.js';
 
 async function generateSignature(params) {
   const paramsToSign = Object.keys(params).sort().map(key => `${key}=${params[key]}`).join('&');
-  const stringToSign = paramsToSign + CLOUDINARY_API_SECRET;
+  const stringToSign = paramsToSign + CLOUDINARY.apiSecret;
   
   const encoder = new TextEncoder();
   const data = encoder.encode(stringToSign);
@@ -22,7 +18,7 @@ async function uploadToCloudinary(file, folder) {
   
   const params = {
     timestamp: timestamp.toString(),
-    upload_preset: CLOUDINARY_UPLOAD_PRESET,
+    upload_preset: CLOUDINARY.uploadPreset,
     folder: `muk_luma/${folder}`,
     public_id: publicId
   };
@@ -32,14 +28,14 @@ async function uploadToCloudinary(file, folder) {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('timestamp', timestamp);
-  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+  formData.append('upload_preset', CLOUDINARY.uploadPreset);
   formData.append('folder', `muk_luma/${folder}`);
   formData.append('public_id', publicId);
   formData.append('signature', signature);
-  formData.append('api_key', CLOUDINARY_API_KEY);
+  formData.append('api_key', CLOUDINARY.apiKey);
   
   try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`, {
       method: 'POST',
       body: formData
     });

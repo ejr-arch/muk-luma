@@ -1,0 +1,22 @@
+{
+  "name": "muk-luma",
+  "version": "1.0.0",
+  "description": "A modern, responsive web platform for discovering, creating, and attending events at Makerere University.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ejr-arch/muk-luma.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "dotenv": "^17.4.2",
+    "vite": "^8.0.8"
+  }
+}

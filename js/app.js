@@ -136,6 +136,7 @@ function setupSearch() {
 function setupAuth() {
   const signOutBtn = $('#sign-out-btn');
   const userMenu = $('.user-menu');
+  const googleBtn = $('.btn-google-auth');
   
   if (signOutBtn) {
     signOutBtn.addEventListener('click', async (e) => {
@@ -156,10 +157,7 @@ function setupAuth() {
       dropdown.classList.remove('active');
     });
   }
-}
-
-async function setupAuth() {
-  const googleBtn = $('.btn-google-auth');
+  
   if (googleBtn) {
     googleBtn.addEventListener('click', async () => {
       await signInWithGoogle();
