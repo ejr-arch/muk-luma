@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard | MUK Events</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23C8102E' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='50' font-weight='bold' fill='white'>M</text></svg>">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="dashboard">
+  <div class="page-loader">
+    <div class="loader-spinner"></div>
+  </div>
+
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="navbar-brand">
+        <img src="muk-logo.png" alt="MUK" style="width:32px;height:32px;border-radius:8px;">
+        <span>MUK Events</span>
+      </a>
+
+      <div class="navbar-nav">
+        <a href="/">Home</a>
+        <a href="events.html">Events</a>
+        <a href="organizations.html">Organizations</a>
+        <a href="dashboard.html" class="active">Dashboard</a>
+      </div>
+
+      <div class="navbar-actions">
+        <div class="user-menu">
+          <div class="dropdown">
+            <button class="btn btn-ghost" style="display: flex; align-items: center; gap: 8px;">
+              <div class="avatar avatar-sm user-avatar"></div>
+              <span class="user-name"></span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </button>
+            <div class="dropdown-menu">
+              <a href="profile.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                Profile
+              </a>
+              <a href="create-event.html" class="dropdown-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Create Event
+              </a>
+              <div class="dropdown-divider"></div>
+              <a href="#" class="dropdown-item" id="sign-out-btn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Sign Out
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <button class="mobile-menu-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mobile-drawer">
+    <div class="mobile-drawer-backdrop"></div>
+    <div class="mobile-drawer-content">
+      <div class="mobile-drawer-header">
+        <a href="/" class="navbar-brand">
+          <img src="muk-logo.png" alt="MUK" style="width:32px;height:32px;border-radius:8px;">
+          <span>MUK Events</span>
+        </a>
+        <button class="btn btn-ghost btn-icon mobile-drawer-close">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div class="mobile-nav-links">
+        <a href="/">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          Home
+        </a>
+        <a href="events.html">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Events
+        </a>
+        <a href="dashboard.html">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          Dashboard
+        </a>
+        <a href="create-event.html">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Create Event
+        </a>
+        <a href="profile.html">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+          Profile
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <main class="main-content">
+    <section class="section" style="padding-top: var(--space-8);">
+      <div class="container">
+        <div class="dashboard-header">
+          <div>
+            <h1 class="page-title">My Dashboard</h1>
+            <p class="page-subtitle">Manage your events and track performance</p>
+          </div>
+          <a href="create-event.html" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Create New Event
+          </a>
+        </div>
+
+        <div class="dashboard-stats" id="dashboard-stats">
+          <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon" style="background-color: var(--primary); color: white;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+            </div>
+            <div class="dashboard-stat-content">
+              <div class="dashboard-stat-value" id="total-events">...</div>
+              <div class="dashboard-stat-label">My Events</div>
+            </div>
+          </div>
+          <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon" style="background-color: #10b981; color: white;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            <div class="dashboard-stat-content">
+              <div class="dashboard-stat-value" id="total-going">...</div>
+              <div class="dashboard-stat-label">Total RSVPs</div>
+            </div>
+          </div>
+          <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon" style="background-color: #f59e0b; color: white;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+            </div>
+            <div class="dashboard-stat-content">
+              <div class="dashboard-stat-value" id="upcoming-count">...</div>
+              <div class="dashboard-stat-label">Upcoming</div>
+            </div>
+          </div>
+          <div class="dashboard-stat-card">
+            <div class="dashboard-stat-icon" style="background-color: #8b5cf6; color: white;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div class="dashboard-stat-content">
+              <div class="dashboard-stat-value" id="total-attendees">...</div>
+              <div class="dashboard-stat-label">Attendees</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-section">
+          <div class="section-header">
+            <h2 class="section-title">My Events</h2>
+            <a href="create-event.html" class="btn btn-primary btn-sm">Create Event</a>
+          </div>
+          <div class="event-grid" id="my-events-grid">
+            <div class="event-card skeleton">
+              <div class="skeleton-img"></div>
+              <div class="skeleton-content">
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+              </div>
+            </div>
+            <div class="event-card skeleton">
+              <div class="skeleton-img"></div>
+              <div class="skeleton-content">
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+              </div>
+            </div>
+            <div class="event-card skeleton">
+              <div class="skeleton-img"></div>
+              <div class="skeleton-content">
+                <div class="skeleton-text"></div>
+                <div class="skeleton-text short"></div>
+              </div>
+            </div>
+          </div>
+          <div class="empty-state hidden" id="no-events">
+            <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            <h3 class="empty-state-title">No events yet</h3>
+            <p class="empty-state-text">Create your first event to get started</p>
+            <a href="create-event.html" class="btn btn-primary">Create Event</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">
+            <img src="muk-logo.png" alt="MUK" style="width:24px;height:24px;border-radius:6px;margin-right:8px;">
+            MUK Events
+          </div>
+          <p class="footer-description">Connecting the Makerere University community through events and experiences.</p>
+        </div>
+        <div>
+          <h4 class="footer-title">Platform</h4>
+          <div class="footer-links">
+            <a href="events.html">Browse Events</a>
+            <a href="organizations.html">Organizations</a>
+            <a href="create-event.html">Create Event</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-title">Resources</h4>
+          <div class="footer-links">
+            <a href="#">Help Center</a>
+            <a href="#">Guidelines</a>
+            <a href="#">Privacy Policy</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="footer-title">Connect</h4>
+          <div class="footer-links">
+            <a href="#">Contact Us</a>
+            <a href="#">Twitter</a>
+            <a href="#">Instagram</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Made with care at Makerere University</p>
+      </div>
+    </div>
+  </footer>
+
+  <nav class="mobile-nav">
+    <a href="/" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Home
+    </a>
+    <a href="events.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      Events
+    </a>
+    <a href="create-event.html" class="mobile-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Create
+    </a>
+    <a href="dashboard.html" class="mobile-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      </svg>
+      Dashboard
+    </a>
+  </nav>
+
+  <script type="module">
+    import { initFirebase } from './js/config.js';
+    import { initAuth, getCurrentUser, signOut } from './js/auth.js';
+    import { $, $$, showToast, getInitials } from './js/utils.js';
+    import { fetchUserEvents, renderEventCard } from './js/events.js';
+    import { setupMobileMenu, setupNavigation } from './js/app.js';
+
+    async function initDashboard() {
+      initFirebase();
+      const user = await initAuth();
+      
+      if (!user) {
+        window.location.href = '/auth.html?redirect=/dashboard.html';
+        return;
+      }
+
+      const role = user.profile?.role;
+      if (role === 'student') {
+        window.location.href = '/profile.html';
+        return;
+      }
+
+      setupNavigation();
+      setupMobileMenu();
+      setupAuth();
+      hidePageLoader();
+      await loadDashboardData(user.id);
+    }
+
+    function setupAuth() {
+      const signOutBtn = $('#sign-out-btn');
+      const userMenu = $('.user-menu');
+      const dropdown = userMenu?.querySelector('.dropdown');
+      
+      if (signOutBtn) {
+        signOutBtn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          await signOut();
+          window.location.href = '/';
+        });
+      }
+      
+      if (dropdown) {
+        dropdown.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dropdown.classList.toggle('active');
+        });
+        
+        document.addEventListener('click', () => {
+          dropdown.classList.remove('active');
+        });
+      }
+    }
+
+    function hidePageLoader() {
+      const loader = $('.page-loader');
+      if (loader) {
+        loader.classList.add('hidden');
+        setTimeout(() => loader.remove(), 300);
+      }
+    }
+
+    async function loadDashboardData(userId) {
+      const { data: events } = await fetchUserEvents(userId);
+      
+      const totalGoing = events.reduce((sum, e) => sum + (e.going_count || 0), 0);
+      const upcomingEvents = events.filter(e => new Date(e.date) > new Date()).length;
+      
+      $('#total-events').textContent = events.length;
+      $('#total-going').textContent = totalGoing;
+      $('#upcoming-count').textContent = upcomingEvents;
+      $('#total-attendees').textContent = totalGoing;
+
+      const grid = $('#my-events-grid');
+      const noEvents = $('#no-events');
+
+      if (events.length === 0) {
+        grid.classList.add('hidden');
+        noEvents.classList.remove('hidden');
+      } else {
+        grid.classList.remove('hidden');
+        noEvents.classList.add('hidden');
+        grid.innerHTML = events.map(event => renderEventCard(event)).join('');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDashboard);
+  </script>
+</body>
+</html>

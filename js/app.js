@@ -572,15 +572,21 @@ async function loadEventDetails(eventId) {
               <div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: var(--space-1);">Organizer</div>
                 <div style="display: flex; align-items: center; gap: var(--space-2);">
-                  <div class="avatar avatar-sm">
-                    ${event.profiles?.avatar_url ? 
-                      `<img src="${event.profiles.avatar_url}" alt="${event.profiles.name}">` :
-                      `<span>${(event.profiles?.name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2)}</span>`
-                    }
-                  </div>
-                  <span>${event.profiles?.name || 'Unknown'}</span>
+                  ${event.profiles?.avatar_url ? 
+                    `<div class="avatar avatar-sm"><img src="${event.profiles.avatar_url}" alt="${event.profiles.name}"></div>` :
+                    event.organizer_name ? 
+                      `<div class="avatar avatar-sm"><span>${event.organizer_name.split(' ').map(n => n[0]).join('').slice(0, 2)}</span></div>` :
+                      `<div class="avatar avatar-sm"><span>U</span></div>`
+                  }
+                  <span>${event.profiles?.name || event.organizer_name || 'Unknown'}</span>
                 </div>
               </div>
+              ${event.contact_email ? `
+                <div style="margin-top: var(--space-3);">
+                  <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: var(--space-1);">Contact</div>
+                  <a href="mailto:${event.contact_email}" style="font-size: 0.875rem;">${event.contact_email}</a>
+                </div>
+              ` : ''}
               ${event.location_coordinates ? `
                 <div>
                   <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: var(--space-1);">Map</div>
@@ -720,13 +726,6 @@ function setupTabs() {
 }
 
 async function initCreateEventPage() {
-  const { isAuthenticated } = await import('./auth.js');
-  
-  if (!isAuthenticated()) {
-    window.location.href = '/auth.html?redirect=/create-event.html';
-    return;
-  }
-  
   setupEventForm();
 }
 

@@ -1,5 +1,5 @@
 import { 
-  ref, get, set, push, remove 
+  ref, get, set, push, remove, onValue 
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 import { getFirebaseAuth, getFirebaseDb } from './config.js';
 import { getCurrentUser } from './auth.js';
@@ -189,8 +189,6 @@ export function subscribeToComments(eventId, callback) {
   const db = getFirebaseDb();
   
   const commentsRef = ref(db, `events/${eventId}/comments`);
-  
-  import { onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
   
   const unsubscribe = onValue(commentsRef, (snapshot) => {
     if (!snapshot.exists()) {

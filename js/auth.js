@@ -10,7 +10,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
 import { ref, get, set, update, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 import { getFirebaseAuth, getFirebaseDb } from './config.js';
-import { showToast, validateEmail, $ } from './utils.js';
+import { showToast, validateEmail, $, getInitials } from './utils.js';
 
 let currentUser = null;
 let authStateListener = null;
@@ -256,6 +256,8 @@ function updateAuthUI() {
     
     const avatarEl = $('.user-avatar', userMenu);
     const nameEl = $('.user-name', userMenu);
+    const dropdownMenu = userMenu.querySelector('.dropdown-menu');
+    const profileLink = dropdownMenu?.querySelector('a[href="profile.html"]');
     
     if (avatarEl) {
       const profile = currentUser.profile;
@@ -265,7 +267,6 @@ function updateAuthUI() {
       if (photoURL) {
         avatarEl.innerHTML = `<img src="${photoURL}" alt="${displayName}">`;
       } else {
-        const { getInitials } = require('./utils.js');
         avatarEl.innerHTML = `<span>${getInitials(displayName)}</span>`;
       }
     }
@@ -273,6 +274,42 @@ function updateAuthUI() {
     if (nameEl) {
       const displayName = currentUser.profile?.name || currentUser.displayName || currentUser.email;
       nameEl.textContent = displayName;
+    }
+    
+    if (profileLink) {
+      const role = currentUser.profile?.role || 'student';
+      
+      if (role === 'organizer' || role === 'admin') {
+        let dashboardLink = profileLink.nextElementSibling;
+        if (!dashboardLink || !dashboardLink.classList.contains('dashboard-link')) {
+          dashboardLink = document.createElement('a');
+          dashboardLink.href = role === 'admin' ? '/admin.html' : '/dashboard.html';
+          dashboardLink.className = 'dropdown-item dashboard-link';
+          dashboardLink.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            ${role === 'admin' ? 'Admin Panel' : 'My Dashboard'}
+          `;
+          profileLink.after(dashboardLink);
+        }
+      }
+      
+      if (role === 'admin') {
+        let adminLink = dropdownMenu?.querySelector('.admin-link');
+        if (!adminLink) {
+          adminLink = document.createElement('a');
+          adminLink.href = '/admin.html';
+          adminLink.className = 'dropdown-item admin-link';
+          adminLink.innerHTML = `
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            Admin Panel
+          `;
+          dropdownMenu?.appendChild(adminLink);
+        }
+      }
     }
   } else {
     authButtons.classList.remove('hidden');

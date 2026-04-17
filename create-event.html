@@ -101,6 +101,12 @@
               <input type="file" id="event-image" accept="image/*" style="display: none;">
               <div id="image-preview"></div>
             </div>
+
+            <div class="input-group">
+              <label class="input-label" for="event-organizer">Organizer Name (optional)</label>
+              <input type="text" class="input" id="event-organizer" name="organizer_name" placeholder="Your name or organization name">
+              <span class="input-hint">Shown on event page as the event creator</span>
+            </div>
           </div>
 
           <div class="form-section">
@@ -168,6 +174,12 @@
                 <label class="input-label" for="event-capacity">Capacity (optional)</label>
                 <input type="number" class="input" id="event-capacity" name="capacity" placeholder="Max number of attendees" min="1" max="10000">
               </div>
+            </div>
+
+            <div class="input-group">
+              <label class="input-label" for="event-contact">Contact Email (optional)</label>
+              <input type="email" class="input" id="event-contact" name="contact_email" placeholder="contact@example.com">
+              <span class="input-hint">Shown on event page for attendee inquiries</span>
             </div>
           </div>
 
@@ -255,7 +267,9 @@
         time: formData.get('time'),
         location_name: locationName,
         category: formData.get('category'),
-        capacity: formData.get('capacity') ? parseInt(formData.get('capacity')) : null
+        capacity: formData.get('capacity') ? parseInt(formData.get('capacity')) : null,
+        contact_email: formData.get('contact_email') || null,
+        organizer_name: formData.get('organizer_name') || null
       };
 
       const imageInput = document.getElementById('event-image');
@@ -282,7 +296,7 @@
       const { data, error } = await createEvent(eventData);
 
       if (!error && data) {
-        window.location.href = `/event.html?id=${data.id}`;
+        window.location.href = '/events.html';
       }
     });
   </script>

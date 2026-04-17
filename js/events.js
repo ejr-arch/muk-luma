@@ -176,21 +176,22 @@ export async function createEvent(eventData) {
   const db = getFirebaseDb();
   const user = auth.currentUser;
   
-  if (!user) {
-    return { data: null, error: 'Not authenticated' };
-  }
-  
   try {
     const eventsRef = ref(db, 'events');
     const newEventRef = push(eventsRef);
     
-    await set(newEventRef, {
+    const eventPayload = {
       ...eventData,
-      created_by: user.uid,
       createdAt: Date.now()
-    });
+    };
     
-    const event = { id: newEventRef.key, ...eventData, created_by: user.uid, createdAt: Date.now() };
+    if (user) {
+      eventPayload.created_by = user.uid;
+    }
+    
+    await set(newEventRef, eventPayload);
+    
+    const event = { id: newEventRef.key, ...eventPayload };
     
     showToast('Event created successfully!', 'success');
     return { data: event, error: null };
