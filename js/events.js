@@ -4,7 +4,32 @@ import {
 import { getFirebaseAuth, getFirebaseDb } from './config.js';
 import { showToast, getInitials, formatDateShort, formatTime, getMonthAbbr, getDay, truncate, getCategoryColor, isUpcoming } from './utils.js';
 
-export async function fetchEvents({ category = null, sort = 'upcoming', limit = 12, offset = 0 } = {}) {
+const eventsCache = {
+  data: null,
+  timestamp: 0,
+  TTL: 60000
+};
+
+function getCachedEvents() {
+  const now = Date.now();
+  if (eventsCache.data && (now - eventsCache.timestamp) < eventsCache.TTL) {
+    return eventsCache.data;
+  }
+  return null;
+}
+
+function setCachedEvents(events) {
+  eventsCache.data = events;
+  eventsCache.timestamp = Date.now();
+}
+
+export async function fetchEvents({ category = null, sort = 'upcoming', limit = 12, offset = 0, useCache = true } = {}) {
+  if (useCache && getCachedEvents()) {
+    const filtered = filterAndSortEvents(getCachedEvents(), category, sort);
+    const paginatedEvents = filtered.slice(offset, offset + limit);
+    return { data: paginatedEvents, error: null };
+  }
+
   const db = getFirebaseDb();
   
   try {
@@ -22,39 +47,53 @@ export async function fetchEvents({ category = null, sort = 'upcoming', limit = 
       events.push({ id, ...event });
     }
     
-    const today = new Date().toISOString().split('T')[0];
+    const filtered = filterAndSortEvents(events, category, sort);
+    const enriched = await enrichEventsWithCounts(filtered);
     
-    switch (sort) {
-      case 'upcoming':
-        events = events
-          .filter(e => e.date >= today)
-          .sort((a, b) => a.date.localeCompare(b.date));
-        break;
-      case 'trending':
-      case 'newest':
-        events = events
-          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        break;
-      case 'past':
-        events = events
-          .filter(e => e.date < today)
-          .sort((a, b) => b.date.localeCompare(a.date));
-        break;
+    if (useCache) {
+      setCachedEvents(enriched);
     }
     
-    if (category && category !== 'all') {
-      events = events.filter(e => e.category === category);
-    }
-    
-    events = await enrichEventsWithCounts(events);
-    
-    const paginatedEvents = events.slice(offset, offset + limit);
+    const paginatedEvents = enriched.slice(offset, offset + limit);
     
     return { data: paginatedEvents, error: null };
   } catch (error) {
     console.error('Error fetching events:', error);
     return { data: [], error };
   }
+}
+
+function filterAndSortEvents(events, category, sort) {
+  const today = new Date().toISOString().split('T')[0];
+  let filtered = [...events];
+  
+  switch (sort) {
+    case 'upcoming':
+      filtered = filtered
+        .filter(e => e.date >= today)
+        .sort((a, b) => {
+          const createdDiff = (b.createdAt || 0) - (a.createdAt || 0);
+          if (Math.abs(createdDiff) > 86400000) return createdDiff;
+          return a.date.localeCompare(b.date);
+        });
+      break;
+    case 'trending':
+    case 'newest':
+      filtered = filtered
+        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      break;
+    case 'past':
+      filtered = filtered
+        .filter(e => e.date < today)
+        .sort((a, b) => b.date.localeCompare(a.date));
+      break;
+  }
+  
+  if (category && category !== 'all') {
+    filtered = filtered.filter(e => e.category === category);
+  }
+  
+  return filtered;
 }
 
 async function enrichEventsWithCounts(events) {
@@ -190,6 +229,9 @@ export async function createEvent(eventData) {
     }
     
     await set(newEventRef, eventPayload);
+    
+    eventsCache.data = null;
+    eventsCache.timestamp = 0;
     
     const event = { id: newEventRef.key, ...eventPayload };
     

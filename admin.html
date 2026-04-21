@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Panel | MUK Events</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23C8102E' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='50' font-weight='bold' fill='white'>M</text></svg>">
+  <link rel="icon" type="image/png" href="muk-logo.png">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
@@ -141,6 +141,7 @@
           </div>
 
           <div id="tab-users" class="admin-tab-content">
+            <div id="pending-requests"></div>
             <div class="admin-toolbar">
               <input type="search" class="input" placeholder="Search users..." id="user-search">
               <select class="input select" id="user-role-filter">
@@ -366,7 +367,24 @@
         return;
       }
       
-      tbody.innerHTML = userList.map(u => `
+      const pendingUsers = userList.filter(u => u.pending_role);
+      const activeUsers = userList.filter(u => !u.pending_role);
+      
+      if (pendingUsers.length > 0) {
+        const pendingSection = $('#pending-requests');
+        if (pendingSection) {
+          pendingSection.innerHTML = `
+            <div class="dashboard-stat-card" style="margin-bottom: var(--space-6); border: 2px solid var(--accent);">
+              <div class="dashboard-stat-content">
+                <div class="dashboard-stat-value" style="color: var(--accent);">${pendingUsers.length}</div>
+                <div class="dashboard-stat-label">Pending Role Requests</div>
+              </div>
+            </div>
+          `;
+        }
+      }
+      
+      tbody.innerHTML = activeUsers.map(u => `
         <tr>
           <td>${u.name || 'N/A'}</td>
           <td>${u.email || 'N/A'}</td>
@@ -443,9 +461,14 @@
 
     window.updateUserRole = async function(userId, newRole) {
       const { updateProfile } = await import('./js/auth.js');
-      const result = await updateProfile({ role: newRole });
+      const updates = { role: newRole };
+      if (newRole !== 'student') {
+        updates.pending_role = null;
+      }
+      const result = await updateProfile.call(null, updates);
       if (!result.error) {
         showToast('User role updated', 'success');
+        loadUsers();
       }
     };
 

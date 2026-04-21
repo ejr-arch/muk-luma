@@ -24,6 +24,9 @@ export async function initAuth() {
       if (user) {
         currentUser = user;
         await loadUserProfile();
+        while (!currentUser.profile) {
+          await new Promise(r => setTimeout(r, 50));
+        }
       } else {
         currentUser = null;
       }
@@ -92,7 +95,7 @@ export function getUserId() {
   return currentUser?.uid || null;
 }
 
-export async function signUp(email, password, name, role = 'student') {
+export async function signUp(email, password, name, requestedRole = 'student') {
   const auth = getFirebaseAuth();
   const db = getFirebaseDb();
   
@@ -101,10 +104,26 @@ export async function signUp(email, password, name, role = 'student') {
     return { error: 'Invalid email' };
   }
   
-  if (password.length < 6) {
-    showToast('Password must be at least 6 characters', 'error');
+  if (password.length < 8) {
+    showToast('Password must be at least 8 characters', 'error');
     return { error: 'Password too short' };
   }
+  
+  if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+    showToast('Password must contain at least one uppercase letter and one number', 'error');
+    return { error: 'Password too weak' };
+  }
+  
+  if (!name || name.trim().length < 2) {
+    showToast('Please enter your full name', 'error');
+    return { error: 'Invalid name' };
+  }
+  
+  const allowedDomains = ['students.mak.ac.ug', 'mak.ac.ug', 'mail.mak.ac.ug'];
+  const emailDomain = email.split('@')[1]?.toLowerCase();
+  const isOrganizerEmail = allowedDomains.some(d => emailDomain === d);
+  
+  const role = requestedRole === 'organizer' && isOrganizerEmail ? 'organizer' : 'student';
   
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -113,16 +132,22 @@ export async function signUp(email, password, name, role = 'student') {
     await firebaseUpdateProfile(user, { displayName: name });
     
     await set(ref(db, `users/${user.uid}`), {
-      name,
+      name: name.trim(),
       email,
       role,
       faculty: null,
       hall: null,
       avatar_url: null,
-      createdAt: Date.now()
+      email_verified: false,
+      createdAt: Date.now(),
+      pending_role: requestedRole === 'organizer' && role === 'student' ? 'organizer' : null
     });
     
-    showToast('Account created successfully!', 'success');
+    if (requestedRole === 'organizer' && role === 'student') {
+      showToast('Account created. Organizer status pending admin approval.', 'success');
+    } else {
+      showToast('Account created successfully!', 'success');
+    }
     return { data: user, error: null };
   } catch (error) {
     showToast(error.message || 'Sign up failed', 'error');

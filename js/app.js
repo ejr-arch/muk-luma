@@ -199,10 +199,12 @@ async function refreshEventsList() {
 }
 
 async function initHomePage() {
-  await loadFeaturedEvent();
-  await loadStats();
-  await loadEvents();
-  await loadCategories();
+  await Promise.all([
+    loadFeaturedEvent(),
+    loadStats(),
+    loadEvents(),
+    loadCategories()
+  ]);
 }
 
 async function loadFeaturedEvent() {

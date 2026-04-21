@@ -1,0 +1,58 @@
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "auth.uid === $uid || auth.uid === root.child('admins').child($uid).val()",
+        ".write": "auth.uid === $uid && !data.exists()",
+        ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 100 &&
+                     newData.child('email').isString() && newData.child('email').val().length <= 254 &&
+                     newData.child('role').isString() && newData.child('role').val() in ['student', 'organizer'] &&
+                     !newData.hasChildren(['is_admin', 'is_super_admin']) &&
+                     !newData.child('role').val() === 'admin'"
+      },
+      "admins": {
+        ".write": false,
+        ".read": "auth != null && root.child('users').child(auth.uid).child('role') === 'admin'"
+      }
+    },
+    "events": {
+      "$eventId": {
+        ".read": "auth != null",
+        ".write": "auth != null && (root.child('users').child(auth.uid).child('role') === 'admin' || 
+                             root.child('users').child(auth.uid).child('role') === 'organizer')",
+        ".validate": "newData.child('title').isString() && newData.child('title').val().length > 0 &&
+                     newData.child('title').val().length <= 200 &&
+                     newData.child('date').isString() &&
+                     newData.child('organizer_id').val() === auth.uid"
+      },
+      "admins": {
+        ".write": "root.child('users').child(auth.uid).child('role') === 'admin'",
+        ".read": "auth != null"
+      }
+    },
+    "comments": {
+      "$eventId": {
+        ".read": "auth != null",
+        ".write": "auth != null && newData.child('user_id').val() === auth.uid",
+        ".validate": "newData.child('text').isString() && newData.child('text').val().length > 0 &&
+                     newData.child('text').val().length <= 1000"
+      }
+    },
+    "rsvps": {
+      "$eventId": {
+        ".read": "auth != null",
+        ".write": "auth.uid === $uid || root.child('users').child(auth.uid).child('role') === 'admin'",
+        ".validate": "$uid === auth.uid"
+      }
+    },
+    "organizations": {
+      "$orgId": {
+        ".read": "auth != null",
+        ".write": "root.child('users').child(auth.uid).child('role') === 'admin'",
+        ".validate": "newData.child('name').isString() && newData.child('name').val().length > 0"
+      }
+    },
+    ".write": false,
+    ".read": false
+  }
+}

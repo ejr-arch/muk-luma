@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Sign in or create account - MUK Events">
   <title>Sign In | MUK Events</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23C8102E' width='100' height='100' rx='20'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='50' font-weight='bold' fill='white'>M</text></svg>">
+  <link rel="icon" type="image/png" href="muk-logo.png">
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/components.css">
@@ -64,13 +64,9 @@
           <label class="input-label" for="signup-password">Password</label>
           <input type="password" class="input" id="signup-password" placeholder="Create a password (min 6 characters)" minlength="6" required>
         </div>
-        <div class="input-group">
-          <label class="input-label" for="signup-role">I am a</label>
-          <select class="input select" id="signup-role" required>
-            <option value="student">Student</option>
-            <option value="organizer">Event Organizer</option>
-          </select>
-        </div>
+        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: var(--space-4);">
+          Use your <strong>@students.mak.ac.ug</strong> or <strong>@mak.ac.ug</strong> email to sign up.
+        </p>
         <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Create Account</button>
       </form>
 
@@ -150,12 +146,14 @@
       const name = document.getElementById('signup-name').value;
       const email = document.getElementById('signup-email').value;
       const password = document.getElementById('signup-password').value;
-      const role = document.getElementById('signup-role').value;
 
       const { signUp } = await import('./js/auth.js');
-      const result = await signUp(email, password, name, role);
+      const result = await signUp(email, password, name);
 
       if (!result.error) {
+        const { getCurrentUser } = await import('./js/auth.js');
+        const user = await getCurrentUser();
+        const role = user?.profile?.role || 'student';
         window.location.href = getRedirectUrl(role, true);
       }
     });
