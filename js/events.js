@@ -398,15 +398,19 @@ export function renderEventCard(event, showDelete = false) {
         <div class="event-card-image-wrapper">
           ${event.image_url ? 
             (event.image_url.match(/\.(mp4|webm|mov|avi)$/i) || event.image_url.includes('video'))
-              ? `<video src="${event.image_url}" class="card-image" loading="lazy" muted playsinline style="object-fit: cover;"></video>`
-              : `<img src="${event.image_url}" alt="${event.title}" class="card-image" loading="lazy">`
+              ? (() => {
+                  let vUrl = event.image_url;
+                  if (vUrl.includes('cloudinary.com') && !vUrl.includes('fl_video')) {
+                    vUrl = vUrl.replace('/upload/', '/upload/fl_video/');
+                  }
+                  return '<video src="' + vUrl + '" class="card-image" loading="lazy" muted playsinline style="object-fit: cover;"></video>';
+                })()
+              : '<img src="' + event.image_url + '" alt="' + event.title + '" class="card-image" loading="lazy">'
             :
-            `<div class="card-image skeleton skeleton-image"></div>`
+            '<div class="card-image skeleton skeleton-image"></div>'
           }
           ${event.image_url && (event.image_url.match(/\.(mp4|webm|mov|avi)$/i) || event.image_url.includes('video')) ? 
-            `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">
-              <i class="fa-solid fa-play-circle" style="font-size: 40px; color: white; opacity: 0.8;"></i>
-            </div>` : ''
+            '<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"><i class="fa-solid fa-play-circle" style="font-size: 40px; color: white; opacity: 0.8;"></i></div>' : ''
           }
           <span class="badge event-card-category" style="background-color: ${categoryStyle.bg}; color: ${categoryStyle.text}">
             ${event.category}

@@ -5,7 +5,7 @@ import { getFirebaseDb } from './config.js';
 
 const subscriptions = new Map();
 
-export async function subscribeToRSVPs(eventId, onUpdate) {
+export async function subscribeToRSVPs(eventId, onUpdate, onRSVPsUpdate) {
   const db = getFirebaseDb();
   const channelName = `rsvps:${eventId}`;
   
@@ -18,6 +18,11 @@ export async function subscribeToRSVPs(eventId, onUpdate) {
   const unsubscribe = onValue(rsvpsRef, async () => {
     const counts = await getRSVPCountsFromDB(eventId);
     onUpdate(counts);
+    
+    if (onRSVPsUpdate) {
+      const rsvps = await getRSVPsListFromDB(eventId);
+      onRSVPsUpdate(rsvps);
+    }
   });
   
   subscriptions.set(channelName, unsubscribe);
@@ -32,6 +37,29 @@ export async function unsubscribeFromRSVPs(eventId) {
   if (unsubscribe) {
     unsubscribe();
     subscriptions.delete(channelName);
+  }
+}
+
+async function getRSVPsListFromDB(eventId) {
+  const db = getFirebaseDb();
+  
+  try {
+    const rsvpsRef = ref(db, `events/${eventId}/rsvps`);
+    const snapshot = await get(rsvpsRef);
+    
+    if (!snapshot.exists()) {
+      return [];
+    }
+    
+    const rsvpsData = snapshot.val();
+    const rsvps = Object.entries(rsvpsData).map(([id, data]) => ({ id, ...data }));
+    
+    rsvps.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    
+    return rsvps;
+  } catch (error) {
+    console.error('Error fetching RSVPs list:', error);
+    return [];
   }
 }
 

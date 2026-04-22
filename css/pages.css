@@ -46,6 +46,8 @@
   position: relative;
   height: 400px;
   margin-bottom: var(--space-8);
+  background: #000;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {
@@ -54,10 +56,12 @@
   }
 }
 
-.event-detail-hero img {
+.event-detail-hero img,
+.event-detail-hero video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .event-detail-hero-overlay {

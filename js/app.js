@@ -612,10 +612,17 @@ async function loadEventDetails(eventId) {
   
   if (heroSection && event.image_url) {
     if (isVideo) {
+      let videoUrl = event.image_url;
+      if (videoUrl.includes('cloudinary.com') && !videoUrl.includes('fl_video')) {
+        videoUrl = videoUrl.replace('/upload/', '/upload/fl_video/');
+      }
       heroSection.innerHTML = `
-        <video src="${event.image_url}" controls style="width: 100%; height: 100%; object-fit: cover;">
-          Your browser does not support the video tag.
-        </video>
+        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000;">
+          <video controls style="width: 100%; height: 100%; object-fit: contain;" playsinline preload="auto">
+            <source src="${videoUrl}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
         <div class="event-detail-hero-overlay"></div>
       `;
     } else {
@@ -859,15 +866,25 @@ async function loadEventDetails(eventId) {
   
   const { data: rsvps } = await fetchEventRSVPs(eventId);
   const attendeeGrid = $('#attendee-grid');
+  const isCreator = event.created_by === user?.id;
+  
   if (attendeeGrid) {
-    if (rsvps.length === 0) {
+    if (isCreator) {
+      if (rsvps.length === 0) {
+        attendeeGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1; padding: var(--space-8);">
+            <p class="empty-state-text">No RSVPs yet.</p>
+          </div>
+        `;
+      } else {
+        attendeeGrid.innerHTML = rsvps.map(rsvp => renderAttendee(rsvp)).join('');
+      }
+    } else {
       attendeeGrid.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1; padding: var(--space-8);">
-          <p class="empty-state-text">No RSVPs yet. Be the first to RSVP!</p>
+          <p class="empty-state-text">Only the event creator can see the attendees list.</p>
         </div>
       `;
-    } else {
-      attendeeGrid.innerHTML = rsvps.map(rsvp => renderAttendee(rsvp)).join('');
     }
   }
   
@@ -875,8 +892,20 @@ async function loadEventDetails(eventId) {
     const goingCount = $('.going-count');
     const interestedCount = $('.interested-count');
     
-    if (goingCount) animateCounter(goingCount, counts.going);
-    if (interestedCount) animateCounter(interestedCount, counts.interested);
+    if (goingCount) goingCount.textContent = counts.going;
+    if (interestedCount) interestedCount.textContent = counts.interested;
+  }, (updatedRSVPs) => {
+    if (isCreator && attendeeGrid) {
+      if (updatedRSVPs.length === 0) {
+        attendeeGrid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1; padding: var(--space-8);">
+            <p class="empty-state-text">No RSVPs yet.</p>
+          </div>
+        `;
+      } else {
+        attendeeGrid.innerHTML = updatedRSVPs.map(rsvp => renderAttendee(rsvp)).join('');
+      }
+    }
   });
   
   subscribeToComments(eventId, async (update) => {
