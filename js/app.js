@@ -133,6 +133,45 @@ function setupSearch() {
   });
 }
 
+async function updateUserMenu() {
+  const user = await getCurrentUser();
+  const userMenu = $('.user-menu');
+  const authButtons = $('.auth-buttons');
+  
+  if (!userMenu) return;
+  
+  const avatarEl = $('.user-avatar', userMenu);
+  const nameEl = $('.user-name', userMenu);
+  
+  if (user) {
+    if (authButtons) authButtons.classList.add('hidden');
+    userMenu.classList.remove('hidden');
+    
+    const profile = user.profile;
+    const displayName = profile?.name || user.displayName || user.email;
+    const photoURL = profile?.avatar_url || user.photoURL;
+    
+    if (avatarEl) {
+      if (photoURL) {
+        avatarEl.innerHTML = `<img src="${photoURL}" alt="${displayName}">`;
+      } else {
+        const initials = getInitials(displayName);
+        avatarEl.innerHTML = `<img src="https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=009900&textColor=ffffff" alt="${displayName}">`;
+      }
+    }
+    
+    if (nameEl) nameEl.textContent = displayName;
+  } else {
+    if (authButtons) authButtons.classList.remove('hidden');
+    userMenu.classList.add('hidden');
+  }
+}
+
+function getInitials(name) {
+  if (!name) return '?';
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
 function setupAuth() {
   const signOutBtn = $('#sign-out-btn');
   const userMenu = $('.user-menu');
@@ -211,14 +250,76 @@ async function initHomePage() {
   }
 }
 
+let featuredEvents = [];
+let currentEventIndex = 0;
+let featuredEventInterval = null;
+
+function renderFeaturedEvent(event, animated = false) {
+  const featuredSection = $('.featured-event');
+  if (!featuredSection || !event) return;
+  
+  const eventDate = new Date(event.date);
+  const formattedDate = eventDate.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric',
+    year: 'numeric'
+  });
+  
+  const imageUrl = event.image_url || '';
+  const bgStyle = imageUrl 
+    ? `background-image: url('${imageUrl}'), linear-gradient(135deg, rgba(0,153,0,0.92) 0%, rgba(0,100,0,0.96) 100%); background-blend-mode: overlay; background-size: cover; background-position: center;`
+    : `background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);`;
+  
+  const animationClass = animated ? 'fade-in-up' : '';
+  
+  featuredSection.innerHTML = `
+    <div class="hero-section featured-event-slide ${animationClass}" style="${bgStyle}">
+      <div class="container" style="position: relative; z-index: 1;">
+        <div class="hero-content">
+          <span class="badge badge-accent" style="background-color: var(--accent); color: #000; margin-bottom: var(--space-4);">Upcoming Event</span>
+          <h1 class="hero-title">${event.title}</h1>
+          <p class="hero-text">${event.description?.substring(0, 150)}${event.description?.length > 150 ? '...' : ''}</p>
+          <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4);">
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span>${formattedDate}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>${event.location_name}</span>
+            </div>
+          </div>
+          <a href="/event.html?id=${event.id}" class="btn btn-white btn-lg">View Event</a>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showNextFeaturedEvent() {
+  if (featuredEvents.length <= 1) return;
+  
+  currentEventIndex = (currentEventIndex + 1) % featuredEvents.length;
+  const event = featuredEvents[currentEventIndex];
+  renderFeaturedEvent(event, true);
+}
+
 async function loadFeaturedEvent() {
   const featuredSection = $('.featured-event');
   if (!featuredSection) return;
   
   try {
-    const { data: event } = await fetchFeaturedEvent();
+    const { fetchEvents } = await import('./events.js');
+    const { data: events } = await fetchEvents({ sort: 'upcoming', limit: 5 });
     
-    if (!event) {
+    featuredEvents = events || [];
+    
+    if (featuredEvents.length === 0) {
       featuredSection.innerHTML = `
         <div class="hero-section">
           <div class="container">
@@ -246,41 +347,13 @@ async function loadFeaturedEvent() {
       return;
     }
     
-    const eventDate = new Date(event.date);
-    const formattedDate = eventDate.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      month: 'long', 
-      day: 'numeric',
-      year: 'numeric'
-    });
+    currentEventIndex = 0;
+    renderFeaturedEvent(featuredEvents[0], false);
     
-    featuredSection.innerHTML = `
-      <div class="hero-section" style="background-image: url('${event.image_url || ''}'); background-size: cover; background-position: center;">
-        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);"></div>
-        <div class="container" style="position: relative; z-index: 1;">
-          <div class="hero-content">
-            <span class="badge badge-accent" style="background-color: var(--accent); color: var(--text-primary); margin-bottom: var(--space-4);">Featured Event</span>
-            <h1 class="hero-title">${event.title}</h1>
-            <p class="hero-text">${event.description?.substring(0, 150)}${event.description?.length > 150 ? '...' : ''}</p>
-            <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4);">
-              <div style="display: flex; align-items: center; gap: var(--space-2);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <span>${formattedDate}</span>
-              </div>
-              <div style="display: flex; align-items: center; gap: var(--space-2);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span>${event.location_name}</span>
-              </div>
-            </div>
-            <a href="/event.html?id=${event.id}" class="btn btn-white btn-lg">View Event</a>
-          </div>
-        </div>
-      </div>
-    `;
+    if (featuredEvents.length > 1) {
+      if (featuredEventInterval) clearInterval(featuredEventInterval);
+      featuredEventInterval = setInterval(showNextFeaturedEvent, 6000);
+    }
   } catch (error) {
     console.error('Error loading featured event:', error);
   }
@@ -876,14 +949,25 @@ async function loadProfile(user) {
   const displayName = profile.name || user.displayName || 'User';
   const avatarUrl = profile.avatar_url || user.photoURL;
   
+  const initials = getInitials(displayName);
+  const defaultAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=009900&textColor=ffffff`;
+  const finalAvatar = avatarUrl || defaultAvatar;
+  
   profileSection.innerHTML = `
     <div class="profile-avatar">
-      <div class="avatar avatar-xl">
+      <div class="avatar avatar-xl" id="profile-avatar-img">
         ${avatarUrl ? 
-          `<img src="${avatarUrl}" alt="${displayName}">` :
-          `<span>${getInitials(displayName)}</span>`
+          `<img src="${finalAvatar}" alt="${displayName}">` :
+          `<img src="${defaultAvatar}" alt="${displayName}">`
         }
       </div>
+      <button class="btn btn-ghost btn-sm" id="change-avatar-btn" style="margin-top: 8px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+        </svg>
+        Change Photo
+      </button>
+      <input type="file" id="avatar-input" accept="image/*" style="display: none;">
     </div>
     <div class="profile-info">
       <h1 class="profile-name">${displayName}</h1>

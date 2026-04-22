@@ -1,11 +1,11 @@
 :root {
   --primary: #009900;
-  --primary-dark: #007A00;
+  --primary-dark: #006400;
   --primary-light: #E8F5E0;
   --secondary: #C8102E;
   --secondary-light: #FFECEE;
-  --accent: #FFD700;
-  --accent-light: #FFF8E0;
+  --accent: #009900;
+  --accent-light: #E8F5E0;
   
   --background: #F8F9FA;
   --surface: #FFFFFF;

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "muk-luma"
-  }
+    "default": "muk-luma",
+    "master": "muk-luma"
+  },
+  "targets": {},
+  "etags": {}
 }

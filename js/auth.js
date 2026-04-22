@@ -304,7 +304,9 @@ function updateAuthUI() {
       if (photoURL) {
         avatarEl.innerHTML = `<img src="${photoURL}" alt="${displayName}">`;
       } else {
-        avatarEl.innerHTML = `<span>${getInitials(displayName)}</span>`;
+        const initials = getInitials(displayName);
+        const defaultAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(displayName)}&backgroundColor=009900&textColor=ffffff`;
+        avatarEl.innerHTML = `<img src="${defaultAvatar}" alt="${displayName}">`;
       }
     }
     

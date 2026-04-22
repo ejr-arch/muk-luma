@@ -1,37 +1,46 @@
 import { showToast } from './utils.js';
-import { SUPABASE } from './config.js';
+import { CLOUDINARY } from './config.js';
 
-async function uploadToSupabase(file, folder) {
+async function uploadToCloudinary(file, folder) {
   const timestamp = Date.now();
   const filename = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
-  const fileExt = file.name.split('.').pop();
+  
+  console.log('Uploading to Cloudinary:', CLOUDINARY.cloudName);
+  console.log('File:', file.name, file.type, file.size);
   
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('path', `${folder}/${filename}`);
-  formData.append('upsert', 'true');
+  formData.append('upload_preset', CLOUDINARY.uploadPreset);
+  if (folder) formData.append('folder', folder);
   
-  const response = await fetch(`${SUPABASE.url}/storage/v1/object/${folder}/${filename}`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SUPABASE.anonKey}`
-    },
-    body: formData
-  });
-  
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error('Upload failed: ' + error);
+  try {
+    const isVideo = file.type.startsWith('video/');
+    const resourceType = isVideo ? 'video' : 'image';
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/${resourceType}/upload`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    console.log('Cloudinary response:', response.status, JSON.stringify(data));
+    
+    if (!response.ok) {
+      console.error('Cloudinary error:', data);
+      throw new Error(data.error?.message || data.error?.error?.message || 'Upload failed');
+    }
+    
+    console.log('Cloudinary upload success:', data.secure_url);
+    
+    return {
+      publicUrl: data.secure_url,
+      publicId: filename,
+      path: data.public_id
+    };
+  } catch (error) {
+    console.error('Cloudinary upload error:', error);
+    throw error;
   }
-  
-  const data = await response.json();
-  const publicUrl = `${SUPABASE.url}/storage/v1/object/public/${folder}/${filename}`;
-  
-  return {
-    publicUrl: publicUrl,
-    publicId: filename,
-    path: `${folder}/${filename}`
-  };
 }
 
 export async function uploadEventImage(file, eventId) {
@@ -41,7 +50,7 @@ export async function uploadEventImage(file, eventId) {
   
   try {
     showToast('Uploading image...', 'info');
-    const result = await uploadToSupabase(file, 'events');
+    const result = await uploadToCloudinary(file, 'events');
     showToast('Image uploaded!', 'success');
     return { data: result, error: null };
   } catch (error) {
@@ -61,7 +70,7 @@ export async function uploadOrganizationLogo(file, orgId) {
   
   try {
     showToast('Uploading logo...', 'info');
-    const result = await uploadToSupabase(file, 'logos');
+    const result = await uploadToCloudinary(file, 'logos');
     showToast('Logo uploaded!', 'success');
     return { data: result, error: null };
   } catch (error) {
@@ -77,7 +86,7 @@ export async function uploadUserAvatar(file) {
   
   try {
     showToast('Uploading avatar...', 'info');
-    const result = await uploadToSupabase(file, 'avatars');
+    const result = await uploadToCloudinary(file, 'avatars');
     showToast('Avatar uploaded!', 'success');
     return { data: result, error: null };
   } catch (error) {
