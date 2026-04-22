@@ -72,9 +72,9 @@ function filterAndSortEvents(events, category, sort) {
       filtered = filtered
         .filter(e => e.date >= today)
         .sort((a, b) => {
-          const createdDiff = (b.createdAt || 0) - (a.createdAt || 0);
-          if (Math.abs(createdDiff) > 86400000) return createdDiff;
-          return a.date.localeCompare(b.date);
+          const dateCompare = a.date.localeCompare(b.date);
+          if (dateCompare !== 0) return dateCompare;
+          return (b.createdAt || 0) - (a.createdAt || 0);
         });
       break;
     case 'trending':

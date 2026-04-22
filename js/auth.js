@@ -20,16 +20,28 @@ export async function initAuth() {
   const db = getFirebaseDb();
   
   return new Promise((resolve) => {
+    let resolved = false;
+    
+    const cleanup = () => {
+      if (resolved) return;
+      resolved = true;
+    };
+    
+    setTimeout(() => {
+      cleanup();
+      updateAuthUI();
+      resolve(currentUser);
+    }, 5000);
+    
     authStateListener = onAuthStateChanged(auth, async (user) => {
+      if (resolved) return;
       if (user) {
         currentUser = user;
         await loadUserProfile();
-        while (!currentUser.profile) {
-          await new Promise(r => setTimeout(r, 50));
-        }
       } else {
         currentUser = null;
       }
+      cleanup();
       updateAuthUI();
       resolve(currentUser);
     });

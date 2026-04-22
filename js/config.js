@@ -4,13 +4,13 @@ import { getDatabase } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-
 import { getStorage } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: "AIzaSyBt-iJiEOWO205mW0Y3p6EZo-LBeQnFjRw",
+  authDomain: "muk-luma.firebaseapp.com",
+  projectId: "muk-luma",
+  databaseURL: "https://muk-luma-default-rtdb.firebaseio.com",
+  storageBucket: "muk-luma.firebasestorage.app",
+  messagingSenderId: "208451460846",
+  appId: "1:208451460846:web:de36f0cc2de1e8d7541dff"
 };
 
 let app = null;
@@ -45,8 +45,13 @@ export function getFirebaseStorage() {
 }
 
 export const CLOUDINARY = {
-  cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
-  apiKey: import.meta.env.VITE_CLOUDINARY_API_KEY,
-  apiSecret: import.meta.env.VITE_CLOUDINARY_API_SECRET,
-  uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+  cloudName: "dkh8e8upn",
+  apiKey: "718983743444877",
+  apiSecret: "TxNIR4uWK-SUHxzmeKzhM20u44U",
+  uploadPreset: "muk_luma"
+};
+
+export const SUPABASE = {
+  url: "https://jtdxrptvcvlwfsevtnku.supabase.co",
+  anonKey: "sb_publishable_ASGMf11qs_jT5q9IJ67Hog_Hu5QorCr"
 };

@@ -42,12 +42,12 @@ export async function initApp() {
         break;
     }
     
-    hidePageLoader();
     initialized = true;
   } catch (error) {
     console.error('App initialization error:', error);
-    showToast('Something went wrong. Please refresh the page.', 'error');
   }
+  
+  hidePageLoader();
 }
 
 function hidePageLoader() {
@@ -199,162 +199,182 @@ async function refreshEventsList() {
 }
 
 async function initHomePage() {
-  await Promise.all([
-    loadFeaturedEvent(),
-    loadStats(),
-    loadEvents(),
-    loadCategories()
-  ]);
+  try {
+    await Promise.all([
+      loadFeaturedEvent(),
+      loadStats(),
+      loadEvents(),
+      loadCategories()
+    ]);
+  } catch (error) {
+    console.error('Error loading home page:', error);
+  }
 }
 
 async function loadFeaturedEvent() {
   const featuredSection = $('.featured-event');
   if (!featuredSection) return;
   
-  const { data: event } = await fetchFeaturedEvent();
-  
-  if (!event) {
-    featuredSection.innerHTML = `
-      <div class="hero-section">
-        <div class="container">
-          <div class="hero-content">
-            <h1 class="hero-title">Discover Campus Events</h1>
-            <p class="hero-text">Find and connect with amazing events happening at Makerere University.</p>
-            <div class="hero-stats">
-              <div>
-                <div class="hero-stat-value">0</div>
-                <div class="hero-stat-label">Upcoming Events</div>
-              </div>
-              <div>
-                <div class="hero-stat-value">0</div>
-                <div class="hero-stat-label">RSVPs</div>
-              </div>
-              <div>
-                <div class="hero-stat-value">0</div>
-                <div class="hero-stat-label">Community</div>
+  try {
+    const { data: event } = await fetchFeaturedEvent();
+    
+    if (!event) {
+      featuredSection.innerHTML = `
+        <div class="hero-section">
+          <div class="container">
+            <div class="hero-content">
+              <h1 class="hero-title">Discover Campus Events</h1>
+              <p class="hero-text">Find and connect with amazing events happening at Makerere University.</p>
+              <div class="hero-stats">
+                <div>
+                  <div class="hero-stat-value">0</div>
+                  <div class="hero-stat-label">Upcoming Events</div>
+                </div>
+                <div>
+                  <div class="hero-stat-value">0</div>
+                  <div class="hero-stat-label">RSVPs</div>
+                </div>
+                <div>
+                  <div class="hero-stat-value">0</div>
+                  <div class="hero-stat-label">Community</div>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+      `;
+      return;
+    }
+    
+    const eventDate = new Date(event.date);
+    const formattedDate = eventDate.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      month: 'long', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+    
+    featuredSection.innerHTML = `
+      <div class="hero-section" style="background-image: url('${event.image_url || ''}'); background-size: cover; background-position: center;">
+        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);"></div>
+        <div class="container" style="position: relative; z-index: 1;">
+          <div class="hero-content">
+            <span class="badge badge-accent" style="background-color: var(--accent); color: var(--text-primary); margin-bottom: var(--space-4);">Featured Event</span>
+            <h1 class="hero-title">${event.title}</h1>
+            <p class="hero-text">${event.description?.substring(0, 150)}${event.description?.length > 150 ? '...' : ''}</p>
+            <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4);">
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+                <span>${formattedDate}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: var(--space-2);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>${event.location_name}</span>
+              </div>
+            </div>
+            <a href="/event.html?id=${event.id}" class="btn btn-white btn-lg">View Event</a>
           </div>
         </div>
       </div>
     `;
-    return;
+  } catch (error) {
+    console.error('Error loading featured event:', error);
   }
-  
-  const eventDate = new Date(event.date);
-  const formattedDate = eventDate.toLocaleDateString('en-US', { 
-    weekday: 'long', 
-    month: 'long', 
-    day: 'numeric',
-    year: 'numeric'
-  });
-  
-  featuredSection.innerHTML = `
-    <div class="hero-section" style="background-image: url('${event.image_url || ''}'); background-size: cover; background-position: center;">
-      <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(200,16,46,0.9) 0%, rgba(155,13,36,0.95) 100%);"></div>
-      <div class="container" style="position: relative; z-index: 1;">
-        <div class="hero-content">
-          <span class="badge badge-accent" style="background-color: var(--accent); color: var(--text-primary); margin-bottom: var(--space-4);">Featured Event</span>
-          <h1 class="hero-title">${event.title}</h1>
-          <p class="hero-text">${event.description?.substring(0, 150)}${event.description?.length > 150 ? '...' : ''}</p>
-          <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4);">
-            <div style="display: flex; align-items: center; gap: var(--space-2);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-              </svg>
-              <span>${formattedDate}</span>
-            </div>
-            <div style="display: flex; align-items: center; gap: var(--space-2);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-              </svg>
-              <span>${event.location_name}</span>
-            </div>
-          </div>
-          <a href="/event.html?id=${event.id}" class="btn btn-white btn-lg">View Event</a>
-        </div>
-      </div>
-    </div>
-  `;
 }
 
 async function loadStats() {
   const statsGrid = $('.landing-stats');
   if (!statsGrid) return;
   
-  const stats = await getEventStats();
-  
-  statsGrid.innerHTML = `
-    <div class="landing-stat-card animate-in stagger-1">
-      <div class="landing-stat-value">${stats.events}</div>
-      <div class="landing-stat-label">Upcoming Events</div>
-    </div>
-    <div class="landing-stat-card animate-in stagger-2">
-      <div class="landing-stat-value">${stats.rsvps}</div>
-      <div class="landing-stat-label">Total RSVPs</div>
-    </div>
-    <div class="landing-stat-card animate-in stagger-3">
-      <div class="landing-stat-value">${stats.users}</div>
-      <div class="landing-stat-label">Community Members</div>
-    </div>
-    <div class="landing-stat-card animate-in stagger-4">
-      <div class="landing-stat-value">8</div>
-      <div class="landing-stat-label">Categories</div>
-    </div>
-  `;
+  try {
+    const stats = await getEventStats();
+    
+    statsGrid.innerHTML = `
+      <div class="landing-stat-card animate-in stagger-1">
+        <div class="landing-stat-value">${stats.events}</div>
+        <div class="landing-stat-label">Upcoming Events</div>
+      </div>
+      <div class="landing-stat-card animate-in stagger-2">
+        <div class="landing-stat-value">${stats.rsvps}</div>
+        <div class="landing-stat-label">Total RSVPs</div>
+      </div>
+      <div class="landing-stat-card animate-in stagger-3">
+        <div class="landing-stat-value">${stats.users}</div>
+        <div class="landing-stat-label">Community Members</div>
+      </div>
+      <div class="landing-stat-card animate-in stagger-4">
+        <div class="landing-stat-value">8</div>
+        <div class="landing-stat-label">Categories</div>
+      </div>
+    `;
+  } catch (error) {
+    console.error('Error loading stats:', error);
+  }
 }
 
 async function loadEvents() {
   const eventGrid = $('.event-grid');
   if (!eventGrid) return;
   
-  eventGrid.innerHTML = Array(6).fill(renderEventCardSkeleton()).join('');
-  
-  const { data: events } = await fetchEvents({ sort: 'upcoming' });
-  
-  if (events.length === 0) {
-    eventGrid.innerHTML = `
-      <div class="empty-state" style="grid-column: 1 / -1;">
-        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-        <h3 class="empty-state-title">No events yet</h3>
-        <p class="empty-state-text">Be the first to create an event and bring the community together!</p>
-        <a href="/create-event.html" class="btn btn-primary">Create Event</a>
-      </div>
-    `;
-    return;
+  try {
+    eventGrid.innerHTML = Array(6).fill(renderEventCardSkeleton()).join('');
+    
+    const { data: events } = await fetchEvents({ sort: 'upcoming' });
+    
+    if (events.length === 0) {
+      eventGrid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          <h3 class="empty-state-title">No events yet</h3>
+          <p class="empty-state-text">Be the first to create an event and bring the community together!</p>
+          <a href="/create-event.html" class="btn btn-primary">Create Event</a>
+        </div>
+      `;
+      return;
+    }
+    
+    eventGrid.innerHTML = events.map(event => renderEventCard(event)).join('');
+  } catch (error) {
+    console.error('Error loading events:', error);
   }
-  
-  eventGrid.innerHTML = events.map(event => renderEventCard(event)).join('');
 }
 
 async function loadCategories() {
   const categoryGrid = $('.category-grid');
   if (!categoryGrid) return;
   
-  const categories = await fetchCategories();
-  
-  const icons = {
-    book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
-    music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
-    trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
-    briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
-    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
-    cpu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>',
-    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
-    palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z"/></svg>'
-  };
-  
-  categoryGrid.innerHTML = categories.map((cat, index) => `
-    <a href="/events.html?category=${cat.id}" class="category-card animate-in stagger-${index + 1}">
-      <div class="category-card-icon" style="background-color: ${cat.color}20; color: ${cat.color};">
-        ${icons[cat.icon] || icons.book}
-      </div>
-      <div class="category-card-name">${cat.name}</div>
-      <div class="category-card-count">${cat.count} events</div>
-    </a>
-  `).join('');
+  try {
+    const categories = await fetchCategories();
+    
+    const icons = {
+      book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+      music: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+      trophy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>',
+      briefcase: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+      users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+      cpu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>',
+      heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
+      palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.555C21.965 6.012 17.461 2 12 2z"/></svg>'
+    };
+    
+    categoryGrid.innerHTML = categories.map((cat, index) => `
+      <a href="/events.html?category=${cat.id}" class="category-card animate-in stagger-${index + 1}">
+        <div class="category-card-icon" style="background-color: ${cat.color}20; color: ${cat.color};">
+          ${icons[cat.icon] || icons.book}
+        </div>
+        <div class="category-card-name">${cat.name}</div>
+        <div class="category-card-count">${cat.count} events</div>
+      </a>
+    `).join('');
+  } catch (error) {
+    console.error('Error loading categories:', error);
+  }
 }
 
 async function initEventsPage() {

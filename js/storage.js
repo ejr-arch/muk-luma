@@ -1,59 +1,37 @@
 import { showToast } from './utils.js';
-import { CLOUDINARY } from './config.js';
+import { SUPABASE } from './config.js';
 
-async function generateSignature(params) {
-  const paramsToSign = Object.keys(params).sort().map(key => `${key}=${params[key]}`).join('&');
-  const stringToSign = paramsToSign + CLOUDINARY.apiSecret;
-  
-  const encoder = new TextEncoder();
-  const data = encoder.encode(stringToSign);
-  const hashBuffer = await crypto.subtle.digest('SHA-1', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
-async function uploadToCloudinary(file, folder) {
-  const timestamp = Math.round(Date.now() / 1000);
-  const publicId = `${folder}/${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  
-  const params = {
-    timestamp: timestamp.toString(),
-    upload_preset: CLOUDINARY.uploadPreset,
-    folder: `muk_luma/${folder}`,
-    public_id: publicId
-  };
-  
-  const signature = await generateSignature(params);
+async function uploadToSupabase(file, folder) {
+  const timestamp = Date.now();
+  const filename = `${timestamp}_${file.name.replace(/\s+/g, '_')}`;
+  const fileExt = file.name.split('.').pop();
   
   const formData = new FormData();
   formData.append('file', file);
-  formData.append('timestamp', timestamp);
-  formData.append('upload_preset', CLOUDINARY.uploadPreset);
-  formData.append('folder', `muk_luma/${folder}`);
-  formData.append('public_id', publicId);
-  formData.append('signature', signature);
-  formData.append('api_key', CLOUDINARY.apiKey);
+  formData.append('path', `${folder}/${filename}`);
+  formData.append('upsert', 'true');
   
-  try {
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`, {
-      method: 'POST',
-      body: formData
-    });
-    
-    if (!response.ok) {
-      throw new Error('Upload failed');
-    }
-    
-    const data = await response.json();
-    return {
-      publicUrl: data.secure_url,
-      publicId: data.public_id,
-      path: data.public_id
-    };
-  } catch (error) {
-    console.error('Cloudinary upload error:', error);
-    throw error;
+  const response = await fetch(`${SUPABASE.url}/storage/v1/object/${folder}/${filename}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${SUPABASE.anonKey}`
+    },
+    body: formData
+  });
+  
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error('Upload failed: ' + error);
   }
+  
+  const data = await response.json();
+  const publicUrl = `${SUPABASE.url}/storage/v1/object/public/${folder}/${filename}`;
+  
+  return {
+    publicUrl: publicUrl,
+    publicId: filename,
+    path: `${folder}/${filename}`
+  };
 }
 
 export async function uploadEventImage(file, eventId) {
@@ -63,7 +41,7 @@ export async function uploadEventImage(file, eventId) {
   
   try {
     showToast('Uploading image...', 'info');
-    const result = await uploadToCloudinary(file, 'events');
+    const result = await uploadToSupabase(file, 'events');
     showToast('Image uploaded!', 'success');
     return { data: result, error: null };
   } catch (error) {
@@ -83,7 +61,7 @@ export async function uploadOrganizationLogo(file, orgId) {
   
   try {
     showToast('Uploading logo...', 'info');
-    const result = await uploadToCloudinary(file, 'logos');
+    const result = await uploadToSupabase(file, 'logos');
     showToast('Logo uploaded!', 'success');
     return { data: result, error: null };
   } catch (error) {
@@ -99,7 +77,7 @@ export async function uploadUserAvatar(file) {
   
   try {
     showToast('Uploading avatar...', 'info');
-    const result = await uploadToCloudinary(file, 'avatars');
+    const result = await uploadToSupabase(file, 'avatars');
     showToast('Avatar uploaded!', 'success');
     return { data: result, error: null };
   } catch (error) {

@@ -1,32 +1,32 @@
 :root {
-  --primary: #C8102E;
-  --primary-dark: #9B0D24;
-  --primary-light: #FFECEE;
-  --secondary: #2D5016;
-  --secondary-light: #E8F5E0;
-  --accent: #F4B41A;
-  --accent-light: #FFF8E6;
+  --primary: #009900;
+  --primary-dark: #007A00;
+  --primary-light: #E8F5E0;
+  --secondary: #C8102E;
+  --secondary-light: #FFECEE;
+  --accent: #FFD700;
+  --accent-light: #FFF8E0;
   
-  --background: #FAFAFA;
+  --background: #F8F9FA;
   --surface: #FFFFFF;
   --surface-elevated: #FFFFFF;
   
-  --text-primary: #1A1A2E;
-  --text-secondary: #6B7280;
-  --text-muted: #9CA3AF;
+  --text-primary: #1A1A1A;
+  --text-secondary: #4A5568;
+  --text-muted: #718096;
   --text-inverse: #FFFFFF;
   
-  --border: #E5E7EB;
-  --border-light: #F3F4F6;
+  --border: #E2E8F0;
+  --border-light: #EDF2F7;
   
-  --success: #10B981;
-  --success-light: #D1FAE5;
-  --info: #3B82F6;
-  --info-light: #DBEAFE;
-  --warning: #F59E0B;
+  --success: #009900;
+  --success-light: #E8F5E0;
+  --info: #1E3A5F;
+  --info-light: #E8F0F8;
+  --warning: #B7791F;
   --warning-light: #FEF3C7;
-  --error: #EF4444;
-  --error-light: #FEE2E2;
+  --error: #C53030;
+  --error-light: #FED7D7;
   
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
