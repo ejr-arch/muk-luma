@@ -612,17 +612,9 @@ async function loadEventDetails(eventId) {
   
   if (heroSection && event.image_url) {
     if (isVideo) {
-      let videoUrl = event.image_url;
-      if (videoUrl.includes('cloudinary.com') && !videoUrl.includes('fl_video')) {
-        videoUrl = videoUrl.replace('/upload/', '/upload/fl_video/');
-      }
       heroSection.innerHTML = `
-        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000;">
-          <video controls style="width: 100%; height: 100%; object-fit: contain;" playsinline preload="auto">
-            <source src="${videoUrl}" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
-        </div>
+        <video src="${event.image_url}" controls style="width: 100%; height: 100%; object-fit: contain; background: #000;" playsinline preload="auto">
+        </video>
         <div class="event-detail-hero-overlay"></div>
       `;
     } else {
