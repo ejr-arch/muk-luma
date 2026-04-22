@@ -313,6 +313,12 @@ export async function deleteEvent(eventId) {
       throw new Error('You can only delete your own events');
     }
     
+    if (eventData.image_url) {
+      import('./storage.js').then(({ deleteEventImage }) => {
+        deleteEventImage(eventData.image_url);
+      }).catch(console.error);
+    }
+    
     await remove(eventRef);
     
     showToast('Event deleted', 'success');
@@ -383,6 +389,9 @@ export function renderEventCard(event, showDelete = false) {
   const upcoming = isUpcoming(event.date);
   const rsvpCount = event.rsvpCount || 0;
   
+  const shareUrl = `${window.location.origin}/event.html?id=${event.id}`;
+  const shareText = `Check out this event: ${event.title}`;
+  
   return `
     <article class="card event-card ${!upcoming ? 'past-event' : ''}" data-event-id="${event.id}" style="position: relative;">
       <a href="/event.html?id=${event.id}" class="event-card-link">
@@ -431,13 +440,36 @@ export function renderEventCard(event, showDelete = false) {
           </div>
         </div>
       </a>
-      ${showDelete ? `
-        <button class="btn btn-icon btn-delete-event" data-id="${event.id}" title="Delete event" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
-        </button>
-      ` : ''}
+      <div class="event-card-actions" style="position: absolute; bottom: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; align-items: center; z-index: 10;">
+        <div style="display: flex; gap: 4px;">
+          ${showDelete ? `
+            <button class="btn btn-icon btn-delete-event" data-id="${event.id}" title="Delete event" style="background: rgba(0,0,0,0.7); border: none; width: 28px; height: 28px; padding: 0;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              </svg>
+            </button>
+          ` : ''}
+        </div>
+        <div class="share-dropdown" style="position: relative;">
+          <button class="btn btn-share-event" title="Share event" style="background: rgba(0,0,0,0.7); border: none; width: 28px; height: 28px; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; border-radius: var(--radius);">
+            <i class="fa-solid fa-share-nodes" style="color: white; font-size: 12px;"></i>
+          </button>
+          <div class="share-menu" style="position: absolute; bottom: 100%; right: 0; margin-bottom: 4px; background: white; border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 4px; display: none; min-width: 120px; z-index: 100;">
+            <a href="https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}" target="_blank" class="share-option" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #333; text-decoration: none; border-radius: var(--radius-sm); font-size: 14px;">
+              <i class="fa-brands fa-whatsapp" style="color: #25D366; font-size: 16px;"></i>
+              WhatsApp
+            </a>
+            <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}" target="_blank" class="share-option" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #333; text-decoration: none; border-radius: var(--radius-sm); font-size: 14px;">
+              <i class="fa-brands fa-linkedin" style="color: #0A66C2; font-size: 16px;"></i>
+              LinkedIn
+            </a>
+            <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}" target="_blank" class="share-option" style="display: flex; align-items: center; gap: 8px; padding: 8px 12px; color: #333; text-decoration: none; border-radius: var(--radius-sm); font-size: 14px;">
+              <i class="fa-brands fa-x-twitter" style="color: #000; font-size: 16px;"></i>
+              X
+            </a>
+          </div>
+        </div>
+      </div>
     </article>
   `;
 }

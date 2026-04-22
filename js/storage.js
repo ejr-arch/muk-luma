@@ -59,8 +59,36 @@ export async function uploadEventImage(file, eventId) {
   }
 }
 
-export async function deleteEventImage(publicId) {
-  return { error: null };
+export async function deleteEventImage(imageUrl) {
+  if (!imageUrl || !CLOUDINARY.cloudName) {
+    return { error: null };
+  }
+  
+  try {
+    const publicId = `events/${imageUrl.split('/').pop().split('.')[0]}`;
+    
+    const timestamp = Math.round(Date.now() / 1000);
+    const paramsStr = `public_id=${publicId}&timestamp=${timestamp}${CLOUDINARY.uploadPreset}`;
+    
+    console.log('Deleting Cloudinary image:', publicId);
+    
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/destroy`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ public_id: publicId, timestamp, upload_preset: CLOUDINARY.uploadPreset })
+    });
+    
+    if (!response.ok) {
+      console.error('Cloudinary delete error:', response.status);
+    } else {
+      console.log('Cloudinary image deleted successfully');
+    }
+    
+    return { error: null };
+  } catch (error) {
+    console.error('Delete image error:', error);
+    return { error: error.message };
+  }
 }
 
 export async function uploadOrganizationLogo(file, orgId) {

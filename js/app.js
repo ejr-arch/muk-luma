@@ -299,9 +299,67 @@ function renderFeaturedEvent(event, animated = false) {
 function showNextFeaturedEvent() {
   if (featuredEvents.length <= 1) return;
   
-  currentEventIndex = (currentEventIndex + 1) % featuredEvents.length;
-  const event = featuredEvents[currentEventIndex];
-  renderFeaturedEvent(event, true);
+  const featuredSection = $('.featured-event');
+  const currentSlide = $('.featured-event-slide');
+  
+  if (currentSlide) {
+    currentSlide.style.opacity = '0';
+    currentSlide.style.transform = 'scale(1.05)';
+  }
+  
+  setTimeout(() => {
+    currentEventIndex = (currentEventIndex + 1) % featuredEvents.length;
+    const event = featuredEvents[currentEventIndex];
+    
+    if (event) {
+      renderFeaturedEventSlide(event);
+    }
+  }, 400);
+}
+
+function renderFeaturedEventSlide(event) {
+  const featuredSection = $('.featured-event');
+  if (!featuredSection || !event) return;
+  
+  const eventDate = new Date(event.date);
+  const formattedDate = eventDate.toLocaleDateString('en-US', { 
+    weekday: 'long', 
+    month: 'long', 
+    day: 'numeric',
+    year: 'numeric'
+  });
+  
+  const imageUrl = event.image_url || '';
+  const bgStyle = imageUrl 
+    ? `background-image: url('${imageUrl}'), linear-gradient(135deg, rgba(0,153,0,0.92) 0%, rgba(0,100,0,0.96) 100%); background-blend-mode: overlay; background-size: cover; background-position: center;`
+    : `background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);`;
+  
+  featuredSection.innerHTML = `
+    <div class="hero-section featured-event-slide" style="${bgStyle}; animation: featuredZoomFade 0.8s ease-out forwards;">
+      <div class="container" style="position: relative; z-index: 1;">
+        <div class="hero-content">
+          <span class="badge badge-accent" style="background-color: var(--accent); color: #000; margin-bottom: var(--space-4);">Upcoming Event</span>
+          <h1 class="hero-title">${event.title}</h1>
+          <p class="hero-text">${event.description?.substring(0, 150)}${event.description?.length > 150 ? '...' : ''}</p>
+          <div style="display: flex; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-4);">
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              <span>${formattedDate}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: var(--space-2);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span>${event.location_name}</span>
+            </div>
+          </div>
+          <a href="/event.html?id=${event.id}" class="btn btn-white btn-lg">View Event</a>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 async function loadFeaturedEvent() {
@@ -343,7 +401,9 @@ async function loadFeaturedEvent() {
     }
     
     currentEventIndex = 0;
-    renderFeaturedEvent(featuredEvents[0], false);
+    const featuredSection = $('.featured-event');
+    renderFeaturedEventSlide(featuredEvents[0]);
+    featuredSection.querySelector('.featured-event-slide').style.animation = 'featuredZoomFade 0.8s ease-out forwards';
     
     if (featuredEvents.length > 1) {
       if (featuredEventInterval) clearInterval(featuredEventInterval);
@@ -1030,8 +1090,29 @@ async function loadUserEvents(userId) {
       </div>
     `;
   } else {
-    eventsList.innerHTML = events.map(event => renderEventCard(event)).join('');
+    eventsList.innerHTML = events.map(event => renderEventCard(event, true)).join('');
+    attachCardEventListeners();
   }
+}
+
+async function attachCardEventListeners() {
+  document.querySelectorAll('.btn-delete-event').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const eventId = btn.dataset.id;
+      if (confirm('Are you sure you want to delete this event?')) {
+        const { deleteEvent } = await import('./events.js');
+        const { error } = await deleteEvent(eventId);
+        if (!error) {
+          const user = await getCurrentUser();
+          if (user) {
+            loadUserEvents(user.id);
+          }
+        }
+      }
+    });
+  });
 }
 
 async function loadUserRSVPs(userId) {
