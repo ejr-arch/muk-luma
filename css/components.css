@@ -180,6 +180,11 @@ textarea.input {
   background-color: var(--border-light);
 }
 
+.card-image video,
+.card-image video::-webkit-media-controls {
+  pointer-events: auto;
+}
+
 .card-body {
   padding: var(--space-5);
 }

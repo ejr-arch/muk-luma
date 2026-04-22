@@ -389,27 +389,25 @@ export function renderEventCard(event, showDelete = false) {
   const upcoming = isUpcoming(event.date);
   const rsvpCount = event.rsvpCount || 0;
   
-  const shareUrl = `${window.location.origin}/event.html?id=${event.id}`;
+const shareUrl = `${window.location.origin}/event.html?id=${event.id}`;
   const shareText = `Check out this event: ${event.title}`;
+  const isVideo = event.image_url && (event.image_url.match(/\.(mp4|webm|mov|avi|mkv|wmv|flv|av1)$/i) || event.image_url.includes('video'));
   
   return `
     <article class="card event-card ${!upcoming ? 'past-event' : ''}" data-event-id="${event.id}" style="position: relative;">
-      <a href="/event.html?id=${event.id}" class="event-card-link">
-        <div class="event-card-image-wrapper">
-          ${event.image_url ? 
-            (() => {
-              const isVideo = event.image_url.match(/\.(mp4|webm|mov|avi|mkv|wmv|flv|av1)$/i) || event.image_url.includes('video');
-              return isVideo
-                ? `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center; position: relative;">
-                    <video src="${event.image_url}" controls playsinline preload="auto" style="width: 100%; height: 100%; object-fit: cover;"></video>
-                  </div>`
-                : `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center;">
-                    <img src="${event.image_url}" alt="${event.title}" style="width: 100%; height: 100%; object-fit: cover;">
-                  </div>`;
-            })()
-            :
-            '<div class="card-image skeleton skeleton-image"></div>'
-          }
+      <div class="event-card-image-wrapper" ${isVideo ? `onclick="handleVideoClick(event, '${event.id}')"` : ''}>
+        ${event.image_url ? 
+          (isVideo
+            ? `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center; position: relative;">
+                <video id="video-${event.id}" src="${event.image_url}" autoplay muted controls playsinline preload="auto" style="width: 100%; height: 100%; object-fit: cover;"></video>
+              </div>`
+            : `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center;">
+                <img src="${event.image_url}" alt="${event.title}" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>`)
+          :
+          '<div class="card-image skeleton skeleton-image"></div>'
+        }
+        <a href="/event.html?id=${event.id}" class="event-card-link">
           <span class="badge event-card-category" style="background-color: ${categoryStyle.bg}; color: ${categoryStyle.text}">
             ${event.category}
           </span>
@@ -417,7 +415,9 @@ export function renderEventCard(event, showDelete = false) {
             <span class="event-card-date-month">${getMonthAbbr(event.date)}</span>
             <span class="event-card-date-day">${getDay(event.date)}</span>
           </div>
-        </div>
+        </a>
+      </div>
+      <a href="/event.html?id=${event.id}" class="event-card-link">
         <div class="card-body event-card-body">
           <h3 class="card-title event-card-title">${event.title}</h3>
           <div class="event-card-meta">
@@ -571,3 +571,16 @@ export async function getEventStats() {
     return { events: 0, rsvps: 0, users: 0 };
   }
 }
+
+window.handleVideoClick = function(event, eventId) {
+  const video = document.getElementById(`video-${eventId}`);
+  if (video && event.target === video) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  }
+};
