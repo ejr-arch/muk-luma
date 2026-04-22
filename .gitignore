@@ -6,6 +6,7 @@ node_modules/
 .env.local
 .env.production
 .env.example
+js/config.local.js
 
 # Build output
 dist/

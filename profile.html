@@ -281,7 +281,31 @@
   </nav>
 
   <script type="module" src="js/app.js"></script>
-  <script>
+  <script type="module">
+    import { fetchUserEvents, renderEventCard, deleteEvent } from './js/events.js';
+    import { getCurrentUser } from './js/auth.js';
+
+    async function loadMyEvents() {
+      const user = await getCurrentUser();
+      if (!user) return;
+
+      const { data: events } = await fetchUserEvents(user.uid);
+      const grid = document.getElementById('my-events-list')?.querySelector('.event-grid');
+      if (!grid || events.length === 0) return;
+
+      grid.innerHTML = events.map(event => renderEventCard(event, true)).join('');
+
+      grid.querySelectorAll('.btn-delete-event').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!confirm('Are you sure you want to delete this event?')) return;
+          const { error } = await deleteEvent(btn.dataset.id);
+          if (!error) btn.closest('.event-card').remove();
+        });
+      });
+    }
+
     const tabs = document.querySelectorAll('.profile-tab');
     const contents = document.querySelectorAll('.profile-tab-content');
 
@@ -296,6 +320,8 @@
         document.getElementById(`tab-${tabName}`)?.classList.add('active');
       });
     });
+
+    loadMyEvents();
   </script>
 </body>
 </html>

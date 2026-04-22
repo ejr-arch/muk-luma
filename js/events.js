@@ -78,6 +78,17 @@ function filterAndSortEvents(events, category, sort) {
         });
       break;
     case 'trending':
+      filtered = filtered.filter(e => e.date >= today);
+      filtered.sort((a, b) => {
+        const aScore = (a.rsvpCount || 0) * 10;
+        const bScore = (b.rsvpCount || 0) * 10;
+        const daysUntilA = Math.abs(new Date(a.date) - new Date()) / (1000 * 60 * 60 * 24);
+        const daysUntilB = Math.abs(new Date(b.date) - new Date()) / (1000 * 60 * 60 * 24);
+        const aRecency = Math.max(0, 30 - daysUntilA);
+        const bRecency = Math.max(0, 30 - daysUntilB);
+        return (bScore + bRecency) - (aScore + aRecency);
+      });
+      break;
     case 'newest':
       filtered = filtered
         .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -366,14 +377,14 @@ export async function fetchCategories() {
   }));
 }
 
-export function renderEventCard(event) {
+export function renderEventCard(event, showDelete = false) {
   const categoryStyle = getCategoryColor(event.category);
   const eventDate = new Date(event.date);
   const upcoming = isUpcoming(event.date);
   const rsvpCount = event.rsvpCount || 0;
   
   return `
-    <article class="card event-card ${!upcoming ? 'past-event' : ''}">
+    <article class="card event-card ${!upcoming ? 'past-event' : ''}" data-event-id="${event.id}" style="position: relative;">
       <a href="/event.html?id=${event.id}" class="event-card-link">
         <div class="event-card-image-wrapper">
           ${event.image_url ? 
@@ -420,6 +431,13 @@ export function renderEventCard(event) {
           </div>
         </div>
       </a>
+      ${showDelete ? `
+        <button class="btn btn-icon btn-delete-event" data-id="${event.id}" title="Delete event" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); border: none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </button>
+      ` : ''}
     </article>
   `;
 }

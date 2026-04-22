@@ -167,11 +167,6 @@ async function updateUserMenu() {
   }
 }
 
-function getInitials(name) {
-  if (!name) return '?';
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-}
-
 function setupAuth() {
   const signOutBtn = $('#sign-out-btn');
   const userMenu = $('.user-menu');
@@ -271,10 +266,10 @@ function renderFeaturedEvent(event, animated = false) {
     ? `background-image: url('${imageUrl}'), linear-gradient(135deg, rgba(0,153,0,0.92) 0%, rgba(0,100,0,0.96) 100%); background-blend-mode: overlay; background-size: cover; background-position: center;`
     : `background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);`;
   
-  const animationClass = animated ? 'fade-in-up' : '';
+  const animationClass = animated ? 'featured-event-fade' : '';
   
   featuredSection.innerHTML = `
-    <div class="hero-section featured-event-slide ${animationClass}" style="${bgStyle}">
+    <div class="hero-section featured-event-slide ${animationClass}" style="${bgStyle}; transition: opacity 0.5s ease-in-out;">
       <div class="container" style="position: relative; z-index: 1;">
         <div class="hero-content">
           <span class="badge badge-accent" style="background-color: var(--accent); color: #000; margin-bottom: var(--space-4);">Upcoming Event</span>
@@ -352,7 +347,7 @@ async function loadFeaturedEvent() {
     
     if (featuredEvents.length > 1) {
       if (featuredEventInterval) clearInterval(featuredEventInterval);
-      featuredEventInterval = setInterval(showNextFeaturedEvent, 6000);
+      featuredEventInterval = setInterval(showNextFeaturedEvent, 12000);
     }
   } catch (error) {
     console.error('Error loading featured event:', error);
@@ -679,9 +674,27 @@ async function loadEventDetails(eventId) {
               ${event.contact_email ? `
                 <div style="margin-top: var(--space-3);">
                   <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: var(--space-1);">Contact</div>
-                  <a href="mailto:${event.contact_email}" style="font-size: 0.875rem;">${event.contact_email}</a>
+                  <a href="mailto:${event.contact_email}" style="font-size: 0.875rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-envelope"></i>${event.contact_email}</a>
                 </div>
               ` : ''}
+              <div style="margin-top: var(--space-3);">
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: var(--space-1);">Share</div>
+                <div style="display: flex; gap: 8px;">
+                  <a href="https://wa.me/?text=${encodeURIComponent(event.title + ' - ' + window.location.href)}" target="_blank" rel="noopener" class="btn btn-icon btn-sm" title="Share on WhatsApp" style="background: #25D366; color: white;">
+                    <i class="fab fa-whatsapp"></i>
+                  </a>
+                  <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(event.title)}&url=${encodeURIComponent(window.location.href)}" target="_blank" rel="noopener" class="btn btn-icon btn-sm" title="Share on X" style="background: #000; color: white;">
+                    <i class="fab fa-x-twitter"></i>
+                  </a>
+                  <a href="https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}" target="_blank" rel="noopener" class="btn btn-icon btn-sm" title="Share on LinkedIn" style="background: #0077B5; color: white;">
+                    <i class="fab fa-linkedin"></i>
+                  </a>
+                  <button class="btn btn-icon btn-sm" title="Copy link" onclick="navigator.clipboard.writeText(window.location.href); alert('Link copied!')" style="background: var(--gray-600); color: white;">
+                    <i class="fas fa-link"></i>
+                  </button>
+                </div>
+              </div>
               ${event.location_coordinates ? `
                 <div>
                   <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: var(--space-1);">Map</div>

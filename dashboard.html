@@ -188,7 +188,7 @@
 
         <div class="dashboard-section">
           <div class="section-header">
-            <h2 class="section-title">My Events</h2>
+            <h2 class="section-title">Upcoming Events</h2>
             <a href="create-event.html" class="btn btn-primary btn-sm">Create Event</a>
           </div>
           <div class="event-grid" id="my-events-grid">
@@ -377,7 +377,21 @@
       } else {
         grid.classList.remove('hidden');
         noEvents.classList.add('hidden');
-        grid.innerHTML = events.map(event => renderEventCard(event)).join('');
+        grid.innerHTML = events.map(event => renderEventCard(event, true)).join('');
+        
+        grid.querySelectorAll('.btn-delete-event').forEach(btn => {
+          btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!confirm('Are you sure you want to delete this event?')) return;
+            const id = btn.dataset.id;
+            const { deleteEvent } = await import('./js/events.js');
+            const { error } = await deleteEvent(id);
+            if (!error) {
+              btn.closest('.event-card').remove();
+            }
+          });
+        });
       }
     }
 

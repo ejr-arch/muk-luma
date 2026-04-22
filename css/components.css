@@ -125,6 +125,8 @@
 .input:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px var(--primary-light);
+  transform: scale(1.02);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .input::placeholder {
