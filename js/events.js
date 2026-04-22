@@ -400,9 +400,8 @@ export function renderEventCard(event, showDelete = false) {
             (() => {
               const isVideo = event.image_url.match(/\.(mp4|webm|mov|avi|mkv|wmv|flv|av1)$/i) || event.image_url.includes('video');
               return isVideo
-                ? `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center;">
-                    <video src="${event.image_url}" muted loop playsinline preload="auto" style="width: 100%; height: 100%; object-fit: cover;"></video>
-                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"><i class="fa-solid fa-play-circle" style="font-size: 40px; color: white; opacity: 0.8;"></i></div>
+                ? `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <video src="${event.image_url}" controls playsinline preload="auto" style="width: 100%; height: 100%; object-fit: cover;"></video>
                   </div>`
                 : `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center;">
                     <img src="${event.image_url}" alt="${event.title}" style="width: 100%; height: 100%; object-fit: cover;">
