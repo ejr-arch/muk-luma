@@ -1042,6 +1042,35 @@ async function initProfilePage() {
   await loadProfile(user);
   await loadUserEvents(user.id);
   await loadUserRSVPs(user.id);
+  attachAvatarChangeListener();
+}
+
+function attachAvatarChangeListener() {
+  const changeBtn = $('#change-avatar-btn');
+  const avatarInput = $('#avatar-input');
+  
+  if (!changeBtn || !avatarInput) return;
+  
+  changeBtn.addEventListener('click', () => avatarInput.click());
+  
+  avatarInput.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    const { uploadUserAvatar } = await import('./storage.js');
+    const { updateProfile } = await import('./auth.js');
+    
+    const result = await uploadUserAvatar(file);
+    
+    if (result.data) {
+      await updateProfile({ avatar_url: result.data.publicUrl });
+      
+      const avatarImg = $('#profile-avatar-img');
+      if (avatarImg) {
+        avatarImg.innerHTML = `<img src="${result.data.publicUrl}" alt="Profile">`;
+      }
+    }
+  });
 }
 
 async function loadProfile(user) {

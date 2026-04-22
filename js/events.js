@@ -397,11 +397,12 @@ export function renderEventCard(event, showDelete = false) {
       <a href="/event.html?id=${event.id}" class="event-card-link">
         <div class="event-card-image-wrapper">
           ${event.image_url ? 
-            '<div class="card-image" style="display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1a2e, #16213e);"><i class="fa-solid fa-video" style="font-size: 48px; color: rgba(255,255,255,0.5);"></i></div>'
+            `<div class="card-image" style="background: #1a1a2e; display: flex; align-items: center; justify-content: center;">
+              <img src="${event.image_url}" alt="${event.title}" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>`
             :
             '<div class="card-image skeleton skeleton-image"></div>'
           }
-          <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;"><i class="fa-solid fa-play-circle" style="font-size: 40px; color: white; opacity: 0.8;"></i></div>
           <span class="badge event-card-category" style="background-color: ${categoryStyle.bg}; color: ${categoryStyle.text}">
             ${event.category}
           </span>
