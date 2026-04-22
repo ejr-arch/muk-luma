@@ -798,16 +798,7 @@ async function loadEventDetails(eventId) {
       
       const status = btn.dataset.status;
       const { toggleRSVP } = await import('./rsvp.js');
-      const result = await toggleRSVP(eventId, status);
-      
-      if (!result.error) {
-        const buttons = $('#rsvp-buttons');
-        if (buttons) {
-          const { renderRSVPButtons } = await import('./rsvp.js');
-          const newRSVP = await getUserRSVP(eventId);
-          buttons.innerHTML = renderRSVPButtons(newRSVP?.status);
-        }
-      }
+      await toggleRSVP(eventId, status);
     });
   }
   

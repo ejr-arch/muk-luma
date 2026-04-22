@@ -42,7 +42,10 @@ export async function toggleRSVP(eventId, status) {
     
     if (existing.exists() && existing.val().status === status) {
       await remove(rsvpRef);
-      showToast(`Removed ${status} RSVP`, 'info');
+      showToast(`Removed ${status}`, 'info');
+      const counts = await getRSVPCounts(eventId);
+      updateRSVPCountsUI(counts);
+      updateRSVPButtonsUI(null);
       return { data: null, error: null, action: 'removed' };
     }
     
@@ -55,11 +58,30 @@ export async function toggleRSVP(eventId, status) {
     });
     
     showToast(`You're ${status}!`, 'success');
+    const counts = await getRSVPCounts(eventId);
+    updateRSVPCountsUI(counts);
+    updateRSVPButtonsUI(status);
     return { data: { status }, error: null, action: 'added' };
   } catch (error) {
     showToast(error.message || 'Failed to RSVP', 'error');
     return { data: null, error: error.message };
   }
+}
+
+function updateRSVPCountsUI(counts) {
+  const goingCount = document.querySelector('.going-count');
+  const interestedCount = document.querySelector('.interested-count');
+  if (goingCount) goingCount.textContent = counts.going;
+  if (interestedCount) interestedCount.textContent = counts.interested;
+}
+
+function updateRSVPButtonsUI(status) {
+  document.querySelectorAll('.rsvp-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.dataset.status === status) {
+      btn.classList.add('active');
+    }
+  });
 }
 
 export async function fetchEventRSVPs(eventId) {
