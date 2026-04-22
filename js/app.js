@@ -609,9 +609,15 @@ async function loadEventDetails(eventId) {
   const heroSection = $('.event-detail-hero');
   if (heroSection && event.image_url) {
     heroSection.innerHTML = `
-      <img src="${event.image_url}" alt="${event.title}">
+      <img src="${event.image_url}" alt="${event.title}" style="cursor: zoom-in;" id="event-hero-image">
       <div class="event-detail-hero-overlay"></div>
     `;
+    setTimeout(() => {
+      const heroImg = $('#event-hero-image');
+      if (heroImg) {
+        heroImg.addEventListener('click', () => openImageModal(event.image_url, event.title));
+      }
+    }, 100);
   } else if (heroSection) {
     heroSection.style.background = `linear-gradient(135deg, ${categoryStyle.bg} 0%, ${categoryStyle.text}20 100%)`;
   }
@@ -1186,3 +1192,25 @@ async function initAuthPage() {
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
+
+function openImageModal(imageUrl, title) {
+  const existing = $('#image-modal');
+  if (existing) existing.remove();
+  
+  const modal = document.createElement('div');
+  modal.id = 'image-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;';
+  modal.innerHTML = `
+    <button style="position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.1);border:none;color:white;font-size:24px;width:40px;height:40px;border-radius:50%;cursor:pointer;">&times;</button>
+    <img src="${imageUrl}" alt="${title}" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;">
+    <p style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:white;font-size:14px;">Click anywhere to close</p>
+  `;
+  
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal || e.target.tagName === 'BUTTON') {
+      modal.remove();
+    }
+  });
+  
+  document.body.appendChild(modal);
+}
