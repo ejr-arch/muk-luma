@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
   <meta name="description" content="Create a new event on MUK Events">
   <title>Create Event | MUK Events</title>
   <link rel="icon" type="image/png" href="muk-logo.png">
@@ -130,29 +130,37 @@
             <h3 class="form-section-title">Location</h3>
 
             <div class="input-group">
-              <label class="input-label" for="event-location">Venue *</label>
-              <select class="input select" id="event-location" name="location_name" required>
-                <option value="">Select a venue</option>
-                <optgroup label="Main Buildings">
+              <label class="input-label" for="event-location">Building *</label>
+              <select class="input select" id="event-building" required>
+                <option value="">Select a building</option>
+                <optgroup label="Computing & Information Sciences">
+                  <option value="CoCIS Building Block A">CoCIS Building Block A</option>
+                  <option value="CoCIS Building Block B">CoCIS Building Block B</option>
+                  <option value="CoCIS Building Block C">CoCIS Building Block C</option>
+                  <option value="CoCIS Building Block D">CoCIS Building Block D</option>
+                  <option value="CoCIS Laboratory Complex">CoCIS Laboratory Complex</option>
+                  <option value="CoCIS Innovation Hub">CoCIS Innovation Hub</option>
+                </optgroup>
+                <optgroup label="Main Teaching Buildings">
                   <option value="Central Teaching Facility (CTF)">Central Teaching Facility (CTF)</option>
-                  <option value="Faculty of Science">Faculty of Science</option>
                   <option value="Mitchell Hall">Mitchell Hall</option>
                   <option value="Africa Hall">Africa Hall</option>
                   <option value="University Hall">University Hall</option>
-                  <option value="Nkrumah Hall">Nkrumah Hall</option>
                   <option value="Senate Building">Senate Building</option>
                   <option value="Main Library">Main Library</option>
-                  <option value="Ellen Johnson Amphitheatre">Ellen Johnson Amphitheatre</option>
                 </optgroup>
                 <optgroup label="Faculties">
+                  <option value="Faculty of Science">Faculty of Science</option>
                   <option value="Faculty of Arts">Faculty of Arts</option>
                   <option value="Faculty of Law">Faculty of Law</option>
                   <option value="Faculty of Medicine">Faculty of Medicine</option>
                   <option value="Faculty of Education">Faculty of Education</option>
                   <option value="Faculty of Agriculture">Faculty of Agriculture</option>
                   <option value="Faculty of Engineering">Faculty of Engineering</option>
+                  <option value="Faculty of Veterinary Medicine">Faculty of Veterinary Medicine</option>
+                  <option value="Business School (ESM)">Business School (ESM)</option>
                   <option value="School of Public Health">School of Public Health</option>
-                  <option value="Business School">Business School (ESM)</option>
+                  <option value="School of Law">School of Law</option>
                 </optgroup>
                 <optgroup label="Halls of Residence">
                   <option value="Namilyango Hall">Namilyango Hall</option>
@@ -161,21 +169,40 @@
                   <option value="Lumumba Hall">Lumumba Hall</option>
                   <option value="Nkozi Hall">Nkozi Hall</option>
                   <option value="Pearl Apartments">Pearl Apartments</option>
+                  <option value="Complex Hall">Complex Hall</option>
+                  <option value="East Hall">East Hall</option>
                 </optgroup>
-                <optgroup label="Conference Rooms">
+                <optgroup label="Conference & Seminar">
                   <option value="Conference Hall A">Conference Hall A</option>
                   <option value="Conference Hall B">Conference Hall B</option>
                   <option value="Seminar Room 1">Seminar Room 1</option>
                   <option value="Seminar Room 2">Seminar Room 2</option>
                   <option value="Seminar Room 3">Seminar Room 3</option>
+                  <option value="Ellen Johnson Amphitheatre">Ellen Johnson Amphitheatre</option>
+                  <option value="CEDAT Auditorium">CEDAT Auditorium</option>
+                </optgroup>
+                <optgroup label="Administrative">
+                  <option value="Vice Chancellor's Office">Vice Chancellor's Office</option>
+                  <option value="University Secretariat">University Secretariat</option>
+                  <option value="ICT Help Desk Building">ICT Help Desk Building</option>
                 </optgroup>
                 <optgroup label="Outdoors">
                   <option value="Library Lawn">Library Lawn</option>
                   <option value="Freedom Square">Freedom Square</option>
                   <option value="Vice Chancellor's Gardens">Vice Chancellor's Gardens</option>
                   <option value="Sports Grounds">Sports Grounds</option>
+                  <option value="Walls of Fame">Walls of Fame</option>
+                  <option value="Muzinda Pavilion">Muzinda Pavilion</option>
                 </optgroup>
                 <option value="Other">Other (specify below)</option>
+              </select>
+            </div>
+
+            <div class="input-group" id="room-group">
+              <label class="input-label" for="event-room">Room / Venue (optional)</label>
+              <select class="input select" id="event-room">
+                <option value="">Select a room</option>
+                <option value="">-- Select building first --</option>
               </select>
             </div>
 
@@ -266,17 +293,79 @@
 
   <script type="module" src="js/app.js"></script>
   <script>
-    const locationSelect = document.getElementById('event-location');
+    const buildingSelect = document.getElementById('event-building');
+    const roomSelect = document.getElementById('event-room');
     const customLocationGroup = document.getElementById('custom-location-group');
     const customLocationInput = document.getElementById('event-location-custom');
 
-    locationSelect.addEventListener('change', () => {
-      if (locationSelect.value === 'Other') {
+    const roomOptions = {
+      'CoCIS Building Block A': ['LT 1', 'LT 2', 'LT 3', 'LT 4', 'LT 5', 'Conference Room A', 'Conference Room B', 'Lab 1', 'Lab 2'],
+      'CoCIS Building Block B': ['LT 1A', 'LT 1B', 'LT 2A', 'LT 2B', 'LT 3', 'Seminar Room 1', 'Seminar Room 2', 'Staff Room', 'Server Room'],
+      'CoCIS Building Block C': ['LT 1', 'LT 2', 'Computer Lab 1', 'Computer Lab 2', 'Research Lab'],
+      'CoCIS Building Block D': ['Auditorium', 'Seminar Room', 'Meeting Room 1', 'Meeting Room 2'],
+      'CoCIS Laboratory Complex': ['Cyber Lab', 'Research Lab 1', 'Research Lab 2', 'Workshop'],
+      'CoCIS Innovation Hub': ['Main Hall', 'Co-working Space', 'Meeting Room', 'Pitch Room'],
+      'Central Teaching Facility (CTF)': ['CTF 1', 'CTF 2', 'CTF 3', 'CTF 4', 'CTF 5', 'CTF 6', 'CTF 7', 'CTF 8', 'Seminar Room', 'Lecture Theatre Complex'],
+      'Mitchell Hall': ['Main Hall', 'Upper Gallery', 'Lower Gallery', 'Seminar Room'],
+      'Africa Hall': ['Main Auditorium', 'Conference Room', 'Meeting Room'],
+      'University Hall': ['Main Hall', 'Gallery', 'Committee Room'],
+      'Senate Building': ['Senate Chamber', 'Conference Room', 'Committee Room 1', 'Committee Room 2'],
+      'Main Library': ['Conference Room', 'Study Room 1', 'Study Room 2', 'Computer Lab', 'Seminar Room'],
+      'Faculty of Science': ['Lecture Room 1', 'Lecture Room 2', 'Lecture Room 3', 'Seminar Room', 'Lab 1', 'Lab 2', 'Lab 3', 'Computer Lab'],
+      'Faculty of Arts': ['Main Hall', 'Seminar Room 1', 'Seminar Room 2', 'Conference Room', 'Tutorial Room'],
+      'Faculty of Law': ['Moot Court', 'Seminar Room 1', 'Seminar Room 2', 'Library', 'Conference Room'],
+      'Faculty of Medicine': ['Lecture Theatre', 'Seminar Room', 'Clinical Skills Lab', 'Anatomy Lab'],
+      'Faculty of Education': ['CEDAT Auditorium', 'Seminar Room 1', 'Seminar Room 2', 'Resource Centre'],
+      'Faculty of Agriculture': ['Main Hall', 'Seminar Room', 'Laboratory', 'Farm Workshop'],
+      'Faculty of Engineering': ['Main Auditorium', 'Lecture Room 1', 'Lecture Room 2', 'Seminar Room', 'Workshop'],
+      'Faculty of Veterinary Medicine': ['Main Hall', 'Seminar Room', 'Clinical Lab', 'Necropsy Room'],
+      'Business School (ESM)': ['Main Auditorium', 'MBA Room', 'Executive Suite', 'Case Room 1', 'Case Room 2', 'Computer Lab'],
+      'School of Public Health': ['Lecture Room', 'Seminar Room', 'Conference Room', 'Lab'],
+      'School of Law': ['Moot Court', 'Seminar Room 1', 'Seminar Room 2', 'Library'],
+      'Namilyango Hall': ['Main Hall', 'Dining Hall', 'Seminar Room'],
+      'Makerere Hall': ['Main Hall', 'Upper Hall', 'Lower Hall', 'Common Room'],
+      'Mary Stuart Hall': ['Main Hall', 'Dining Hall', 'Common Room'],
+      'Lumumba Hall': ['Main Hall', 'Common Room'],
+      'Nkozi Hall': ['Main Hall', 'Seminar Room'],
+      'Pearl Apartments': ['Common Room', 'Meeting Room'],
+      'Complex Hall': ['Main Hall', 'Common Room'],
+      'East Hall': ['Main Hall', 'Common Room'],
+      'Conference Hall A': ['Main Hall'],
+      'Conference Hall B': ['Main Hall'],
+      'Seminar Room 1': [],
+      'Seminar Room 2': [],
+      'Seminar Room 3': [],
+      'Ellen Johnson Amphitheatre': ['Amphitheatre'],
+      'CEDAT Auditorium': [],
+      'Vice Chancellor\'s Office': ['Board Room', 'Conference Room'],
+      'University Secretariat': ['Main Hall', 'Committee Room'],
+      'ICT Help Desk Building': ['Help Desk', 'Training Room', 'Conference Room'],
+      'Library Lawn': [],
+      'Freedom Square': [],
+      'Vice Chancellor\'s Gardens': [],
+      'Sports Grounds': ['Main Field', 'Practice Field'],
+      'Walls of Fame': [],
+      'Muzinda Pavilion': []
+    };
+
+    buildingSelect.addEventListener('change', () => {
+      const building = buildingSelect.value;
+      
+      if (building === 'Other') {
         customLocationGroup.classList.remove('hidden');
         customLocationInput.required = true;
+        roomSelect.innerHTML = '<option value="">-- Select building first --</option>';
       } else {
         customLocationGroup.classList.add('hidden');
         customLocationInput.required = false;
+        
+        const rooms = roomOptions[building] || [];
+        if (rooms.length > 0) {
+          roomSelect.innerHTML = '<option value="">Select a room</option>' + 
+            rooms.map(r => `<option value="${r}">${r}</option>`).join('');
+        } else {
+          roomSelect.innerHTML = '<option value="">No rooms available</option>';
+        }
       }
     });
 
@@ -288,8 +377,12 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      let locationName = locationSelect.value;
-      if (locationName === 'Other') {
+      let locationName = buildingSelect.value;
+      const room = roomSelect.value;
+      if (room) {
+        locationName = `${locationName}, ${room}`;
+      }
+      if (buildingSelect.value === 'Other') {
         locationName = customLocationInput.value.trim();
       }
 

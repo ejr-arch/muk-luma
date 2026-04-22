@@ -119,3 +119,116 @@ strong, b {
   h2 { font-size: 1.5rem; }
   h3 { font-size: 1.25rem; }
 }
+
+/* Phone-specific responsive fixes */
+@media (max-width: 480px) {
+  :root {
+    --container-max: 100%;
+    --space-4: 12px;
+    --space-6: 16px;
+  }
+  
+  body {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  .container {
+    padding: 0 var(--space-4);
+  }
+  
+  .event-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+  
+  .card {
+    border-radius: var(--radius);
+  }
+  
+  .card-image {
+    aspect-ratio: 16/10;
+  }
+  
+  .event-detail-hero {
+    height: 220px !important;
+  }
+  
+  .two-column-layout {
+    display: block;
+  }
+  
+  .sidebar {
+    margin-top: var(--space-6);
+  }
+  
+  .hero-section {
+    padding: var(--space-8) 0;
+  }
+  
+  .hero-title {
+    font-size: 1.75rem;
+  }
+  
+  .event-detail-title {
+    font-size: 1.5rem;
+  }
+  
+  .event-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .event-tab {
+    white-space: nowrap;
+    padding: var(--space-2) var(--space-4);
+  }
+  
+  .filters-bar {
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .category-pill {
+    flex-shrink: 0;
+  }
+  
+  .input, .select {
+    font-size: 16px;
+  }
+  
+  .btn {
+    padding: var(--space-3) var(--space-4);
+    font-size: 14px;
+  }
+  
+  .navbar-brand span {
+    display: none;
+  }
+  
+  .mobile-nav {
+    padding: var(--space-2);
+  }
+  
+  .mobile-nav-item {
+    font-size: 11px;
+  }
+  
+  .mobile-nav-item svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .event-card-actions {
+    gap: 3px;
+  }
+  
+  .event-card-actions .btn {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    padding: 0;
+  }
+}
