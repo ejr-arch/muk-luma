@@ -48,13 +48,19 @@ export async function uploadEventImage(file, eventId) {
     return { data: null, error: 'No file provided' };
   }
   
+  const maxSize = 20 * 1024 * 1024;
+  if (file.size > maxSize) {
+    return { data: null, error: 'File too large. Maximum size is 20MB.' };
+  }
+  
   try {
-    showToast('Uploading image...', 'info');
+    const isVideo = file.type.startsWith('video/');
+    showToast(isVideo ? 'Uploading video...' : 'Uploading...', 'info');
     const result = await uploadToCloudinary(file, 'events');
-    showToast('Image uploaded!', 'success');
+    showToast('Uploaded successfully!', 'success');
     return { data: result, error: null };
   } catch (error) {
-    showToast('Failed to upload image', 'error');
+    showToast('Failed to upload', 'error');
     return { data: null, error: error.message };
   }
 }

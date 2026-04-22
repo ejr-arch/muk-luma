@@ -263,7 +263,7 @@ function renderFeaturedEvent(event, animated = false) {
   
   const imageUrl = event.image_url || '';
   const bgStyle = imageUrl 
-    ? `background-image: url('${imageUrl}'), linear-gradient(135deg, rgba(0,153,0,0.92) 0%, rgba(0,100,0,0.96) 100%); background-blend-mode: overlay; background-size: cover; background-position: center;`
+    ? `background-image: url('${imageUrl}'); background-size: cover; background-position: center;`
     : `background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);`;
   
   const animationClass = animated ? 'featured-event-fade' : '';
@@ -330,9 +330,10 @@ function renderFeaturedEventSlide(event) {
   });
   
   const imageUrl = event.image_url || '';
-  const bgStyle = imageUrl 
-    ? `background-image: url('${imageUrl}'), linear-gradient(135deg, rgba(0,153,0,0.92) 0%, rgba(0,100,0,0.96) 100%); background-blend-mode: overlay; background-size: cover; background-position: center;`
-    : `background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);`;
+  const isVideo = imageUrl && (imageUrl.match(/\.(mp4|webm|mov|avi)$/i) || imageUrl.includes('video'));
+  const bgStyle = imageUrl && !isVideo
+    ? `background-image: url('${imageUrl}'); background-size: cover; background-position: center;`
+    : `background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);`;
   
   featuredSection.innerHTML = `
     <div class="hero-section featured-event-slide" style="${bgStyle}; animation: featuredZoomFade 0.8s ease-out forwards;">
@@ -607,17 +608,28 @@ async function loadEventDetails(eventId) {
   document.title = `${event.title} | MUK Events`;
   
   const heroSection = $('.event-detail-hero');
+  const isVideo = event.image_url && (event.image_url.match(/\.(mp4|webm|mov|avi)$/i) || event.image_url.includes('video'));
+  
   if (heroSection && event.image_url) {
-    heroSection.innerHTML = `
-      <img src="${event.image_url}" alt="${event.title}" style="cursor: zoom-in;" id="event-hero-image">
-      <div class="event-detail-hero-overlay"></div>
-    `;
-    setTimeout(() => {
-      const heroImg = $('#event-hero-image');
-      if (heroImg) {
-        heroImg.addEventListener('click', () => openImageModal(event.image_url, event.title));
-      }
-    }, 100);
+    if (isVideo) {
+      heroSection.innerHTML = `
+        <video src="${event.image_url}" controls style="width: 100%; height: 100%; object-fit: cover;">
+          Your browser does not support the video tag.
+        </video>
+        <div class="event-detail-hero-overlay"></div>
+      `;
+    } else {
+      heroSection.innerHTML = `
+        <img src="${event.image_url}" alt="${event.title}" style="cursor: zoom-in;" id="event-hero-image">
+        <div class="event-detail-hero-overlay"></div>
+      `;
+      setTimeout(() => {
+        const heroImg = $('#event-hero-image');
+        if (heroImg) {
+          heroImg.addEventListener('click', () => openImageModal(event.image_url, event.title));
+        }
+      }, 100);
+    }
   } else if (heroSection) {
     heroSection.style.background = `linear-gradient(135deg, ${categoryStyle.bg} 0%, ${categoryStyle.text}20 100%)`;
   }

@@ -236,7 +236,7 @@
 }
 
 .hero-section {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
   color: var(--text-inverse);
   padding: var(--space-16) 0;
   margin-bottom: var(--space-12);

@@ -397,8 +397,16 @@ export function renderEventCard(event, showDelete = false) {
       <a href="/event.html?id=${event.id}" class="event-card-link">
         <div class="event-card-image-wrapper">
           ${event.image_url ? 
-            `<img src="${event.image_url}" alt="${event.title}" class="card-image" loading="lazy">` :
+            (event.image_url.match(/\.(mp4|webm|mov|avi)$/i) || event.image_url.includes('video'))
+              ? `<video src="${event.image_url}" class="card-image" loading="lazy" muted playsinline style="object-fit: cover;"></video>`
+              : `<img src="${event.image_url}" alt="${event.title}" class="card-image" loading="lazy">`
+            :
             `<div class="card-image skeleton skeleton-image"></div>`
+          }
+          ${event.image_url && (event.image_url.match(/\.(mp4|webm|mov|avi)$/i) || event.image_url.includes('video')) ? 
+            `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;">
+              <i class="fa-solid fa-play-circle" style="font-size: 40px; color: white; opacity: 0.8;"></i>
+            </div>` : ''
           }
           <span class="badge event-card-category" style="background-color: ${categoryStyle.bg}; color: ${categoryStyle.text}">
             ${event.category}
@@ -442,8 +450,13 @@ export function renderEventCard(event, showDelete = false) {
       </a>
       <div class="event-card-actions" style="position: absolute; bottom: 8px; right: 8px; display: flex; gap: 4px; z-index: 10;">
         ${showDelete ? `
+          <a href="/create-event.html?id=${event.id}" class="btn btn-icon btn-edit-event" title="Edit event" style="background: rgba(0,0,0,0.6); border: none; width: 28px; height: 28px; padding: 0; opacity: 0.9; display: flex; align-items: center; justify-content: center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            </svg>
+          </a>
           <button class="btn btn-icon btn-delete-event" data-id="${event.id}" title="Delete event" style="background: rgba(0,0,0,0.6); border: none; width: 28px; height: 28px; padding: 0; opacity: 0.9;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" width="14" height="14">
               <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
             </svg>
           </button>

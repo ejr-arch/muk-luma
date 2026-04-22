@@ -68,7 +68,7 @@
   <main class="main-content">
     <div class="page-header">
       <div class="container">
-        <h1 class="page-title">Create Event</h1>
+        <h1 class="page-title" id="page-title">Create Event</h1>
         <p class="page-subtitle">Share your event with the Makerere community</p>
       </div>
     </div>
@@ -96,10 +96,10 @@
                 <svg class="file-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                 </svg>
-                <p class="file-upload-text">Drag and drop an image here, or click to browse</p>
-                <p class="file-upload-hint">Recommended: 1200x630px, max 2MB</p>
+                <p class="file-upload-text">Drag and drop an image or video here, or click to browse</p>
+                <p class="file-upload-hint">Images: 1200x630px (max 20MB) | Videos: MP4, WebM (max 20MB)</p>
               </div>
-              <input type="file" id="event-image" accept="image/*,video/mp4,video/webm,video/quicktime" style="display: none;">
+              <input type="file" id="event-image" accept="image/*,video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
               <div id="image-preview"></div>
             </div>
 
@@ -374,6 +374,66 @@
     dateInput.min = today;
 
     const form = document.getElementById('create-event-form');
+    const params = new URLSearchParams(window.location.search);
+    const editEventId = params.get('id');
+    
+    async function loadEventForEdit(eventId) {
+      const { fetchEvent } = await import('./js/events.js');
+      const { data, error } = await fetchEvent(eventId);
+      
+      if (error || !data) return;
+      
+      document.getElementById('page-title').textContent = 'Edit Event';
+      document.title = 'Edit Event | MUK Events';
+      
+      document.getElementById('event-title').value = data.title || '';
+      document.getElementById('event-description').value = data.description || '';
+      document.getElementById('event-date').value = data.date || '';
+      document.getElementById('event-time').value = data.time || '';
+      document.getElementById('event-category').value = data.category || '';
+      document.getElementById('event-capacity').value = data.capacity || '';
+      document.getElementById('event-contact').value = data.contact_email || '';
+      document.getElementById('event-organizer').value = data.organizer_name || '';
+      
+      if (data.location_name) {
+        const parts = data.location_name.split(', ');
+        const building = parts[0] || data.location_name;
+        const room = parts.slice(1).join(', ') || '';
+        
+        const buildingOption = document.querySelector(`#event-building option[value="${building}"]`);
+        if (buildingOption) {
+          buildingSelect.value = building;
+          buildingSelect.dispatchEvent(new Event('change'));
+          if (room) {
+            setTimeout(() => {
+              const roomOption = document.querySelector(`#event-room option[value="${room}"]`);
+              if (roomOption) {
+                roomSelect.value = room;
+              }
+            }, 100);
+          }
+        } else {
+          buildingSelect.value = 'Other';
+          buildingSelect.dispatchEvent(new Event('change'));
+          customLocationInput.value = data.location_name;
+        }
+      }
+      
+      if (data.image_url) {
+        const fileUpload = document.getElementById('file-upload');
+        if (fileUpload) {
+          fileUpload.innerHTML = `
+            <img src="${data.image_url}" alt="Event image" style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--radius);">
+            <p style="margin-top: 8px;">Click to change image</p>
+          `;
+        }
+      }
+    }
+    
+    if (editEventId) {
+      loadEventForEdit(editEventId);
+    }
+    
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -403,12 +463,21 @@
       let imageUrl = null;
 
       if (imageInput.files?.[0]) {
+        const file = imageInput.files[0];
+        const maxSize = 20 * 1024 * 1024;
+        
+        if (file.size > maxSize) {
+          const { showToast } = await import('./js/utils.js');
+          showToast('File too large. Maximum size is 20MB.', 'error');
+          return;
+        }
+        
         const { uploadEventImage } = await import('./js/storage.js');
-        const { data, error } = await uploadEventImage(imageInput.files[0]);
+        const { data, error } = await uploadEventImage(file);
 
         if (error) {
           const { showToast } = await import('./js/utils.js');
-          showToast('Failed to upload image', 'error');
+          showToast('Failed to upload file: ' + error, 'error');
           return;
         }
 
@@ -419,11 +488,18 @@
         eventData.image_url = imageUrl;
       }
 
-      const { createEvent } = await import('./js/events.js');
-      const { data, error } = await createEvent(eventData);
-
-      if (!error && data) {
-        window.location.href = '/events.html';
+      const { createEvent, updateEvent } = await import('./js/events.js');
+      
+      if (editEventId) {
+        const { data, error } = await updateEvent(editEventId, eventData);
+        if (!error && data) {
+          window.location.href = '/event.html?id=' + editEventId;
+        }
+      } else {
+        const { data, error } = await createEvent(eventData);
+        if (!error && data) {
+          window.location.href = '/events.html';
+        }
       }
     });
   </script>
