@@ -3,44 +3,25 @@ import { getAuth } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth
 import { getDatabase } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js';
 
-let FIREBASE_CONFIG, CLOUDINARY_CONFIG, SUPABASE_CONFIG;
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBt-iJiEOWO205mW0Y3p6EZo-LBeQnFjRw",
+  authDomain: "muk-luma.firebaseapp.com",
+  projectId: "muk-luma",
+  databaseURL: "https://muk-luma-default-rtdb.firebaseio.com",
+  storageBucket: "muk-luma.firebasestorage.app",
+  messagingSenderId: "208451460846",
+  appId: "1:208451460846:web:de36f0cc2de1e8d7541dff"
+};
 
-try {
-  const local = await import('./config.local.js');
-  FIREBASE_CONFIG = local.FIREBASE_CONFIG;
-  CLOUDINARY_CONFIG = local.CLOUDINARY_CONFIG;
-  SUPABASE_CONFIG = local.SUPABASE_CONFIG;
-} catch {
-  const firebaseApiKey = import.meta.env?.FIREBASE_API_KEY || 'pk_live_placeholder';
-  const firebaseAuthDomain = import.meta.env?.FIREBASE_AUTH_DOMAIN || 'placeholder.firebaseapp.com';
-  const firebaseProjectId = import.meta.env?.FIREBASE_PROJECT_ID || 'placeholder';
-  const firebaseDatabaseURL = import.meta.env?.FIREBASE_DATABASE_URL || 'https://placeholder.firebaseio.com';
-  const firebaseStorageBucket = import.meta.env?.FIREBASE_STORAGE_BUCKET || 'placeholder.firebasestorage.app';
-  const firebaseMessagingSenderId = import.meta.env?.FIREBASE_MESSAGING_SENDER_ID || '000000000000';
-  const firebaseAppId = import.meta.env?.FIREBASE_APP_ID || '1:000000000000:web:placeholder';
+const CLOUDINARY_CONFIG = {
+  cloudName: "dkh8e8upn",
+  uploadPreset: "muk-luma"
+};
 
-  FIREBASE_CONFIG = {
-    apiKey: firebaseApiKey,
-    authDomain: firebaseAuthDomain,
-    projectId: firebaseProjectId,
-    databaseURL: firebaseDatabaseURL,
-    storageBucket: firebaseStorageBucket,
-    messagingSenderId: firebaseMessagingSenderId,
-    appId: firebaseAppId
-  };
-
-  CLOUDINARY_CONFIG = {
-    cloudName: import.meta.env?.CLOUDINARY_CLOUD_NAME || 'placeholder',
-    uploadPreset: import.meta.env?.CLOUDINARY_UPLOAD_PRESET || 'placeholder'
-  };
-
-  SUPABASE_CONFIG = {
-    url: import.meta.env?.SUPABASE_URL || 'https://placeholder.supabase.co',
-    anonKey: import.meta.env?.SUPABASE_ANON_KEY || 'placeholder'
-  };
-}
-
-const firebaseConfig = FIREBASE_CONFIG;
+const SUPABASE_CONFIG = {
+  url: "https://jtdxrptvcvlwfsevtnku.supabase.co",
+  anonKey: "sb_publishable_ASGMf11qs_jT5q9IJ67Hog_Hu5QorCr"
+};
 
 let app = null;
 let auth = null;
@@ -50,7 +31,7 @@ let storage = null;
 export function initFirebase() {
   if (app) return { app, auth, database, storage };
   
-  app = initializeApp(firebaseConfig);
+  app = initializeApp(FIREBASE_CONFIG);
   auth = getAuth(app);
   database = getDatabase(app);
   storage = getStorage(app);
