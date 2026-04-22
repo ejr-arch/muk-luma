@@ -608,7 +608,7 @@ async function loadEventDetails(eventId) {
   document.title = `${event.title} | MUK Events`;
   
   const heroSection = $('.event-detail-hero');
-  const isVideo = event.image_url && (event.image_url.match(/\.(mp4|webm|mov|avi|mkv|wmv|flv|av1)$/i) || event.image_url.includes('video') || event.image_url.includes('cloudinary') && (event.image_url.includes('/v') || event.image_url.includes('upload'));
+  const isVideo = event.image_url && (event.image_url.match(/\.(mp4|webm|mov|avi|mkv|wmv|flv|av1)$/i) || event.image_url.includes('video') || (event.image_url.includes('cloudinary') && (event.image_url.includes('/v') || event.image_url.includes('upload'))));
   
   if (heroSection && event.image_url) {
     if (isVideo) {
